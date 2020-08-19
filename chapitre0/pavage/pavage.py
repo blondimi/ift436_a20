@@ -18,7 +18,7 @@ def paver(r, t):
     if r.singleton():
         return []
     else:
-        # Scinder région r en quatre régions
+        # Scinder région r en quatre régions (et leurs coins)
         moitie_x = (r.droite + r.gauche) // 2
         moitie_y = (r.bas    + r.haut)   // 2
         
@@ -27,45 +27,26 @@ def paver(r, t):
         r_bg = Region(r.gauche,     moitie_x, moitie_y + 1, r.bas)
         r_bd = Region(moitie_x + 1, r.droite, moitie_y + 1, r.bas)
 
+        regions = [(r_hg, (r_hg.bas,  r_hg.droite)), # haut gauche
+                   (r_hd, (r_hd.bas,  r_hd.gauche)), # haut droite
+                   (r_bg, (r_bg.haut, r_bg.droite)), # bas gauche
+                   (r_bd, (r_bd.haut, r_bd.gauche))] # bas droite
+
+        # Paver régions
         tuiles         = []
         nouvelle_tuile = []
 
-        # Paver région haut gauche
-        if r_hg.contient(t):
-            tuiles += paver(r_hg, t)
-        else:
-            trou    = (r_hg.bas, r_hg.droite)
-            tuiles += paver(r_hg, trou)
-            nouvelle_tuile.append(trou)
+        for (region, coin) in regions:
+            if region.contient(t):
+                tuiles += paver(region, t)
+            else:
+                tuiles += paver(region, coin)
+                nouvelle_tuile.append(coin)
 
-        # Paver région haut droite
-        if r_hd.contient(t):
-            tuiles += paver(r_hd, t)
-        else:
-            trou    = (r_hd.bas, r_hd.gauche)
-            tuiles += paver(r_hd, trou)
-            nouvelle_tuile.append(trou)
+        # Ajouter la nouvelle tuile qui touche trois régions
+        tuiles.append(tuple(nouvelle_tuile))
 
-        # Paver région bas gauche
-        if r_bg.contient(t):
-            tuiles += paver(r_bg, t)
-        else:
-            trou    = (r_bg.haut, r_bg.droite)
-            tuiles += paver(r_bg, trou)
-            nouvelle_tuile.append(trou)
-
-        # Paver région bas droite
-        if r_bd.contient(t):
-            tuiles += paver(r_bd, t)
-        else:
-            trou    = (r_bd.haut, r_bd.gauche)
-            tuiles += paver(r_bd, trou)
-            nouvelle_tuile.append(trou)
-
-    # Ajouter la nouvelle tuile qui touche trois régions
-    tuiles.append(tuple(nouvelle_tuile))
-
-    return tuiles
+        return tuiles
 
 # Exemple
 if __name__ == "__main__":
