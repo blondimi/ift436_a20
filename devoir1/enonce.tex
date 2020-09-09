@@ -1,0 +1,468 @@
+\PassOptionsToPackage{table}{xcolor}
+\documentclass{article}
+
+%% Mise en pages
+\usepackage{fontspec}                 %% >> Pour compiler
+\setmainfont{XCharter}                %%                 avec xelatex <<
+%\usepackage[utf8]{inputenc}          %% >> Pour compiler avec pdflatex <<
+\usepackage[french]{babel}            %% Français
+\NoAutoSpacing                        %% Retire l'espacement devant «:»
+\usepackage{geometry}                 %% Agrandir les marges
+\geometry{left=2.5cm, right=2.5cm, top=2.25cm}
+\setlength{\parskip}{\baselineskip}   %% Ajouter espacement entre lignes
+\setlength{\parindent}{0pt}           %% Retirer indentation
+\usepackage{fancyhdr}                 %% En-têtes/pieds de page
+\pagestyle{fancy}                     %%
+\fancyhf{}                            %%
+\fancyhead[R]{\session}               %%
+\fancyhead[L]{\sigle~--~\coursentete} %%
+\fancyhead[C]{\evaluation}            %%
+\fancyfoot[C]{\thepage}               %%
+
+%% Packages
+\usepackage{amsmath,amssymb}          %% Maths
+\usepackage{mathtools}                %% \coloneqq
+\usepackage{multicol}                 %% \begin{multicols}
+\usepackage{enumerate}                %% Extension de \begin{enumerate}
+\usepackage{exsheets}                 %% Environnements d'exercices
+\newcommand*\pointsformat[1]{{\scriptsize#1}}
+\SetupExSheets{                       %%
+  question/name        = {Question},  %%
+  points/name          = {\scriptsize pt/s},
+  points/bonus-name    = {\scriptsize pt/s},
+}                                     %%
+\usepackage{tikz}                     %% Dessins
+\usetikzlibrary{patterns}             %%
+\usepackage{hyperref}                 %% Hyperliens
+\hypersetup{                          %%
+    colorlinks,                       %%
+    linkcolor={blue!70!black},        %%
+    citecolor={blue!70!black},        %%
+    urlcolor={red!70!black}           %%
+}                                     %%
+\usepackage[noline, onelanguage, french,
+            noend]{algorithm2e}       %% Algorithmes
+
+%% Virgules francophones dans pointage
+%%  (tiré de https://tex.stackexchange.com/a/396982/68991)
+\usepackage[locale=FR, detect-weight]{siunitx}
+\ExplSyntaxOn
+\cs_set_protected:Npn \exsheets_num:n #1
+ {
+  \num{\fp_eval:n{#1}}
+ }
+\ExplSyntaxOff
+
+%% Bonus
+\newcommand{\avance}{{\large$\bigstar$}}         %% Symbole pour bonus
+\newcommand{\avancepts}{{\scriptsize$\bigstar$}} %%
+
+%% Algorithmes
+\newcommand{\A}{\mathcal{A}}                     %% Nom générique d'algo.
+\newcommand{\B}{\mathcal{B}}                     %% Nom générique alternatif
+\renewcommand{\O}{\mathcal{O}}                   %% Notation O(·)
+\newcommand{\F}{\mathcal{F}}                     %% Ensemble de fonctions
+\newcommand{\algskip}{\vspace{3pt}}              %% Espacement vertical
+\definecolor{colComment}{rgb}{0.13, 0.55, 0.13}  %% Commentaires de couleur
+\newcommand\commentstyle[1]{\ttfamily\textcolor{colComment}{#1}}
+\SetCommentSty{commentstyle}                     %%
+
+%% Maths
+\newcommand{\defeq}{\coloneqq}                   %% Définition (opérateur)
+\newcommand{\N}{\mathbb{N}}                      %% Entiers naturels
+
+%% Couleurs
+\colorlet{colEmph}{cyan!80!blue}
+\colorlet{colEmph2}{magenta!80!black}
+\colorlet{colEmph3}{green!70!black}
+\colorlet{colEmph4}{blue!80!purple}
+\colorlet{colEmph5}{orange}
+
+%% Commande de titre
+\newcommand{\maketitlecustom}{%
+  \begin{center}
+    \begin{tabular}{c}
+      \Large \sigle~--~\cours         \\[3pt]
+      \large Université de Sherbrooke \\[10pt]
+      \LARGE \textbf{\evaluation}     \\[10pt]
+    \end{tabular}
+    \begin{tabular}{lp{6.25cm}}
+      Enseignant:     & \enseignant   \\
+      Date de remise: & \remise       \\
+      À réaliser:     & \equipes      \\
+      Modalités:      & \modalites    \\
+      Bonus:          & \bonust       \\
+      Pointage:       & max.\ \pointssum*~points + \bonussum*~points bonus
+    \end{tabular}
+  \end{center}
+}
+
+%% Information de l'évaluation
+\newcommand{\evaluation}{Devoir 1}
+\newcommand{\remise}{mercredi 23 septembre 2020 à 10h29}
+\newcommand{\modalites}{remettre en ligne sur \href{http://opus.dinf.usherbrooke.ca/}{Turnin}}
+\newcommand{\equipes}{en équipe de deux {\scriptsize ou individuellement}}
+\newcommand{\bonust}{les questions bonus sont indiquées par \avance{}}
+
+\newcommand{\sigle}{IFT436}
+\newcommand{\cours}{Algorithmes et structures de données}
+\newcommand{\coursentete}{Algorithmes et struct.\ de données}
+\newcommand{\session}{Automne 2020}
+\newcommand{\enseignant}{Michael Blondin}
+
+%% Contenu
+\begin{document}
+
+\maketitlecustom
+
+\SetupExSheets{
+  question/name        = {Question},
+  points/name          = {\scriptsize pt/s},
+  points/bonus-name    = {\scriptsize pt/s},
+  points/number-format = \pointsformat,
+  points/bonus-format  = \pointsformat,
+}
+
+\vspace*{0.5cm}
+
+%% Question 1
+\SetupExSheets{counter-format=qu[1]:~{rédaction et analyse d'algorithmes}}
+
+\newcommand{\salle}[3]{%
+  \raisebox{2.5pt}{%
+    \fcolorbox{black}{#3}{%
+      \makebox[#2ex][c]{$\underset{#2~mins.}{\text{salle $#1$}}$}%
+    }%
+  }\hspace*{-0.5pt}%
+}
+
+\begin{question}\medskip
+  L'escouade étudiante de l'université nettoie les salles de classe
+  chaque matin. En général, il y a $m \in \N_{>0}$ salles à nettoyer
+  par $n \in \N_{>0}$ personnes. Le temps requis pour laver la
+  $i^\text{ème}$ salle est de $t[i] \in \N_{>0}$ minutes. Ainsi, une
+  personne qui nettoierait l'entiereté du campus mettrait $t[1] + t[2]
+  + \cdots + t[m]$ minutes pour y arriver. Comme l'escouade est
+  normalement constituée de plusieurs personnes, jusqu'à $n$ salles
+  peuvent être traitées simultanément. Par soucis de distanciation, il
+  n'est pas permis d'assigner plus d'une personne à une même~salle.
+
+  Dans le but de compléter le nettoyage aussi rapidement que possible,
+  l'université considère l'approche suivante. Les personnes sont
+  numérotées de $1$ à $n$, et les salles sont distribuées à tour de
+  rôle à la personne qui détient la plus petite charge de travail. Si
+  plusieurs personnes possèdent une charge minimale, alors la personne
+  avec le plus petit numéro d'identification reçoit la salle. Par
+  exemple, considérons $n = 3$ personnes et ces $m = 5$~salles:
+  \begin{center}
+    \begin{tabular}{|c|>{\itshape}l|c|} \hline
+      \multicolumn{2}{|c|}{\textbf{\emph{Salle}}} &
+      \textbf{\emph{Temps requis}} \\
+
+      \rowcolor{colEmph2!20}
+      \hline $1$ & D2-1060 & 21 mins. \\
+
+      \rowcolor{colEmph4!20}
+      \hline $2$ & D7-2023 & 20 mins. \\
+      
+      \rowcolor{colEmph5!20}
+      \hline $3$ & D4-2011 & 16 mins. \\
+
+      \rowcolor{colEmph!20}
+      \hline $4$ & D7-2021 & 18 mins. \\
+
+      \rowcolor{colEmph3!20}
+      \hline $5$ & D3-2029 & 13 mins. \\
+
+      \hline
+    \end{tabular}
+  \end{center}
+  Initialement, chaque personne possède une charge de travail de 0
+  minute. La première personne se fait donc assigner la salle 1. Les
+  trois personnes possèdent maintenant une charge de travail de 21, 0
+  et 0 minutes, respectivement. Ainsi, la deuxième personne reçoit la
+  salle 2, puis, la troisième personne reçoit la salle 3. À ce stade,
+  elles possèdent une charge de 21, 20 et 16 minutes,
+  respectivement. La troisième personne possède donc la plus petite
+  charge de travail et se fait ainsi assigner la salle 4. Les charges
+  sont donc maintenant de 21, 20 et 34 minutes. La salle 5 est ainsi
+  assignée à la deuxième personne. Nous obtenons cette distribution:
+  \begin{center}
+    \begin{tabular}{cl}
+      \textbf{\emph{Personne 1:}} &
+      \salle{1}{21}{colEmph2!20} \\[15pt]
+
+      \textbf{\emph{Personne 2:}} &
+      \salle{2}{20}{colEmph4!20}\salle{5}{13}{colEmph3!20} \\[15pt]
+
+      \textbf{\emph{Personne 3:}} &
+      \salle{3}{16}{colEmph5!20}\salle{4}{18}{colEmph!20}
+    \end{tabular}
+  \end{center}
+  Ainsi, le nettoyage sera complété en 34 minutes.
+
+  \pagebreak
+
+  \begin{enumerate}[(a)]
+  \setlength\itemsep{15pt}
+
+  \item Décrivez \marginpar{\addpoints{6}} la procédure de
+    distribution des salles sous forme de \emph{pseudocode}. Spécifiez
+    le format de l'entrée et de la sortie de l'algorithme. Seules les
+    séquences (tableaux et listes) sont permises comme structures de
+    données. Vous ne pouvez pas invoquer des algorithmes existants en
+    \og boîtes noires \fg{}. Sur l'entrée de la page précédente,
+    l'algorithme devrait retourner $\left[[1], [2, 5], [3,
+        4]\right]$.\label{itm:algo}
+
+  \item Analysez \marginpar{\addpoints{5}} le temps d'exécution de la
+    procédure décrite en~\eqref{itm:algo} dans le \emph{pire cas} et
+    le \emph{meilleur cas} à la manière du diaporama
+    d'introduction. Vous devez compter le nombre d'opérations
+    élémentaires en fonction de $m$ et $n$ (et non pas utiliser la
+    notation $\O$). Indiquez quelles opérations sont considérées
+    élémentaires. Laissez une trace de vos calculs.
+
+  \item Prouvez \marginpar{\addpoints{3}} que $34$ minutes est bel et
+    bien la durée minimale pour l'exemple de la page précédente;
+    autrement dit, prouvez qu'il n'existe \emph{aucune} distribution
+    des cinq salles qui donne une durée \emph{inférieure} à $34$
+    minutes. Donnez un argument plus concis qu'une simple énumération
+    de toutes les distributions possibles.
+
+  \item Montrez \marginpar{\addpoints{3}} que la procédure décrite
+    en~\eqref{itm:algo} ne retourne pas toujours une distribution de
+    durée minimale.
+
+  \item Donnez \marginpar{\addpoints{5}} un algorithme qui
+    retourne \emph{toujours} une distribution de durée minimale, en
+    complétant le pseudocode ci-dessous. Ne vous souciez pas de son
+    efficacité.\label{itm:algo2}\bigskip
+    
+    \hspace*{20pt}%
+    \begin{algorithm}[H]
+      \DontPrintSemicolon
+      \LinesNumbered
+      
+      \nl\tcp{à compléter}
+      \algskip
+      \For{toute séquence $s$ de $m$ éléments
+                 parmi $\{1, 2, \ldots, n\}$\label{ln:loop}}{
+        \algskip
+        \textcolor{white}{ }\tcp{à compléter} %% Hack: ligne vide
+      }
+      \algskip
+      \textcolor{white}{ }\tcp{à compléter}   %% Hack: ligne vide
+    \end{algorithm}
+    \bigskip
+    \emph{Par exemple, pour $m = 3$ et $n = 2$, la boucle principale
+      énumère ces séquences:} \[[1, 1, 1],\ [2, 1, 1],\ [1, 2,
+      1],\ [2, 2, 1],\ [1, 1, 2],\ [2, 1, 2],\ [1, 2, 2],\ [2, 2,
+      2].\]
+
+  \item Combien \marginpar{\addpoints{3}} de tours de la boucle
+    principale sont effectués dans le pire cas dans l'algorithme
+    obtenu en~\eqref{itm:algo2}? Autrement dit, combien de fois est-ce
+    que la ligne~\ref{ln:loop} est atteinte dans le pire cas?
+    \\[75pt]
+
+  \item[\avance{}] Donnez \marginpar{\avancepts{} \addbonus{2.5}} une
+    implémentation, sous forme de pseudocode, de la procédure décrite
+    en~\eqref{itm:algo}, qui fonctionne en temps $\O(n + m \log n)$
+    dans le pire cas. Vous pouvez cette fois utiliser des structures
+    de données avancées, dont celles introduites en IFT339.
+  \end{enumerate}
+\end{question}
+
+\pagebreak
+
+%% Question 2
+\SetupExSheets{counter-format=qu[1]:~{conception d'algorithmes}}
+
+\begin{question}\medskip
+  Dû à la logistique de nettoyage, l'université cherche également à
+  minimiser le nombre de salles utilisées dans une journée donnée. Par
+  exemple, considérons une journée qui compterait trois cours à ces
+  périodes respectives: 8h30 à 10h30, 9h30 à 11h30 et 14h30 à
+  16h30. Bien que ces cours pourraient avoir lieu dans trois salles
+  distinctes, il est possible d'utiliser deux salles le matin et d'en
+  réutiliser une l'après-midi. De façon générale, nous cherchons ainsi
+  à minimiser le nombre de salles en fonction d'un horaire donné. On
+  ignore ici les tailles physiques et le nombre d'inscriptions.
+
+  Formellement, un \emph{cours} est une paire $(i, j) \in \N^2$, telle
+  que $i < j$, où $i$ représente le moment où le cours débute et $j$
+  représente celui où il se termine. Deux cours $(i, j)$ et $(k,
+  \ell)$ peuvent avoir lieu dans la même salle si $j \leq k$;
+  autrement dit, s'ils ne se chevauchent pas. Un \emph{horaire} est
+  une séquence finie de cours. Un horaire est réalisable dans $m$
+  salles si l'on peut assigner à chaque cours une salle parmi $m$
+  choix, sans créer de conflit. Par exemple, considérons l'horaire $H
+  = [(0, 2), (1, 3), (1, 4), (9, 13), (7, 8), (8, 11)]$ illustré
+  ci-dessous. Celui-ci peut être réalisé avec trois salles, par
+  ex.\ les salles $[1, 2, 3, 2, 3, 1]$. Il est \emph{impossible} de
+  réaliser $H$ avec moins de salles puisqu'il y a trois cours en
+  simultané au moment $1$. Ainsi, la sortie attendue pour cet horaire
+  $H$ est $3$.
+
+  \begin{center}
+    \begin{tikzpicture}[thick]
+      %% Lignes verticales
+      \foreach \x in {0,...,13} {
+        \draw[ultra thin, black!25] (\x, 1 - 0.25) -- (\x, 4 - 0.25);
+        \node[font=\sffamily, yshift=-10pt] at (\x, 1 - 0.25) {\x};
+      }
+
+      %% Blocs rectangulaires
+      \newcommand{\bloc}[5]{%
+        \draw[#4, fill=#4, pattern=#5, pattern color=#4]
+        (#1, #3) rectangle (#2, #3 + 0.5);
+      }
+
+      \bloc{0}{2}{1}{colEmph}{north west lines}
+      \bloc{1}{3}{2}{black}{crosshatch}
+      \bloc{1}{4}{3}{colEmph3}{north east lines}
+      \bloc{9}{13}{2}{colEmph4}{crosshatch}
+      \bloc{7}{8}{3}{colEmph5}{north east lines}
+      \bloc{8}{11}{1}{colEmph2}{north west lines}
+    \end{tikzpicture}
+  \end{center}  
+
+  \begin{enumerate}[(a)]
+  \setlength\itemsep{15pt}
+
+  \item Quel est \marginpar{\addpoints{1}} le plus petit nombre et le
+    plus grand nombre de salles pouvant être requis pour un horaire de
+    $n$ cours? Dans les deux cas, donnez un exemple générique où cela
+    se produit.
+
+  \item Combien \marginpar{\addpoints{1}} y a-t-il de façons
+    d'assigner $m$ salles à $n$ cours (en incluant celles qui peuvent
+    créer des conflits)? Un algorithme qui génèrerait toutes ces
+    assignations fonctionnerait-il en temps polynomial?
+
+  \item Quel est \marginpar{\addpoints{1}} le nombre minimal de salles
+    permettant de réaliser l'horaire ci-dessous? \[[(0, 5), (1, 12),
+      (8, 11), (3, 8), (12, 14), (13, 15), (18, 20), (1, 16)]\]
+
+  \item Donnez un \marginpar{\addpoints{7}} algorithme, sous forme de
+    pseudocode, qui résout ce problème:
+    \begin{quote}
+      \smallskip
+      \begin{tabular}{ll}
+        \textsc{Entrée}: & un horaire $H = [(i_1, j_1), \ldots, (i_n,
+          j_n)]$ \\[2pt]
+        
+        \textsc{Sortie}: & le nombre minimal de salles qui permet de
+        réaliser $H$
+      \end{tabular}
+      \smallskip
+    \end{quote}
+
+    Vous pouvez utiliser une instruction \textbf{trier} qui trie une
+    séquence de $n$ éléments, selon l'ordre de votre choix, en temps
+    $\O(n \log n)$ dans le pire cas. Analysez le temps d'exécution de
+    votre algorithme asymptotiquement dans le pire cas. Vous
+    obtiendrez jusqu'à:\medskip
+    \begin{itemize}
+    \setlength\itemsep{8pt}
+      
+    \item 7 points si votre algorithme fonctionne en temps
+      $\O(n \log n)$,
+      
+    \item 3{,}5 points si votre algorithme fonctionne en temps $\O(n^2)$.
+    \end{itemize}
+  \end{enumerate}
+\end{question}
+
+\pagebreak
+
+%% Question 3
+\SetupExSheets{counter-format=qu[1]:~{notation et analyse asymptotique}}
+
+\begin{question}
+  \begin{enumerate}[(a)]
+  \setlength\itemsep{15pt}
+
+  \item Considérons \marginpar{\addpoints{3}} un algorithme $\A$ lancé
+    sur un ordinateur qui exécute 225~000 millions d'opérations
+    élémentaires par seconde. Soit $t(n)$ le temps d'exécution de $\A$
+    dans le pire cas. Pour chacune des fonctions suivantes, donnez la
+    plus grande valeur (entière) de $n$ où $\A$ termine (à coup sûr)
+    en une minute ou moins.
+    \begin{multicols}{2}
+      \begin{enumerate}[(i)]
+      \setlength\itemsep{5pt}
+        
+      \item $t(n) = n$
+        
+      \item $t(n) = n \log_2 n$
+          
+      \item $t(n) = n^2$
+          
+      \item $t(n) = n^3$
+          
+      \item $t(n) = 2^n$
+        
+      \item $t(n) = n!$
+      \end{enumerate}
+    \end{multicols} 
+    Il n'est pas nécessaire de justifier vos réponses.
+        
+  \item Considérons \marginpar{\addpoints{1}} deux algorithmes $\A$ et
+    $\B$. Soit $f(n)$ le temps d'exécution de $\A$ dans le \emph{pire
+    cas}, et soit $g(n)$ le temps d'exécution de $\B$ dans le
+    \emph{meilleur cas}. Dans les deux scénarios suivants, dites à
+    partir de quelle valeur (entière) de $n$ l'algorithme $\A$ est
+    \emph{toujours plus rapide} que $\B$:\medskip
+
+    \begin{enumerate}[(i)]
+    \setlength\itemsep{5pt}
+
+    \item \makebox[3.45cm][l]{$f(n) = 100000 \cdot n^3$} et $g(n) =
+      3^n$,
+
+    \item \makebox[3.45cm][l]{$f(n) = 1000 \cdot n \log_2 n$} et $g(n)
+      = n^2$.
+
+    \end{enumerate}
+    \bigskip
+    Il n'est pas nécessaire de justifier vos réponses.
+
+  \item Montrez \marginpar{\addpoints{3}} que $2(n-4)(n+2)(n+3) + 8
+    \log n \in \Theta(n^3)$ sans utiliser les propositions vues en
+    classes (donc en identifiant explicitement les constantes
+    multiplicatives et seuils).
+
+  \item Ordonnez \marginpar{\addpoints{4}} les fonctions suivantes
+    selon la notation $\O$ (de la plus faible vers la plus haute
+    complexité):
+    \[
+    \log_3 (9n^2) + 128!,\qquad
+    2^{4 \cdot \log_2(n)} + 100\sqrt{n},\qquad
+    \sum_{i=1}^{n} (7i + 2),\qquad
+    \sum_{i=1}^n (2^i - 5i),\qquad
+    \frac{n}{3} + 1000000
+    \]
+    Autrement dit, votre réponse devrait être de la forme \og $\O(f_1)
+    \subset \O(f_2) \subset \O(f_3) \subset \O(f_4) \subset \O(f_5)$
+    \fg. Justifiez \emph{une seule} inclusion en montrant que $f_i \in
+    \O(f_{i+1})$ et $f_{i+1} \not\in \O(f_i)$ pour un indice $i$ de
+    votre choix.
+    
+  \item Soit \marginpar{\addpoints{4}} un algorithme $\A$ qui
+    fonctionne en temps $f(n) \defeq \sum_{i=0}^n (i / 2^i)$ dans le
+    pire cas. Montrez, par induction, que $\displaystyle f(n) =
+    (2^{n+1} - n - 2) / 2^n$ pour tout $n \in \N$. Expliquez pourquoi
+    $\A$ fonctionne en temps constant.
+
+    \vspace*{75pt}
+
+  \item[\avance{}] Montrez \marginpar{\avancepts{} \addbonus{2.5}}
+    qu'il existe des fonctions $f, g \in \F$ telles que $f \not\in
+    \O(g)$ et $g \not\in \O(f)$; donc, incomparables selon $\O$.
+
+  \end{enumerate}
+\end{question}
+
+\end{document}
