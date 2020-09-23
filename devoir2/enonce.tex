@@ -1,0 +1,446 @@
+\documentclass{article}
+
+%% Mise en pages
+\usepackage{fontspec}                 %% >> Pour compiler
+\setmainfont{XCharter}                %%                 avec xelatex <<
+%\usepackage[utf8]{inputenc}          %% >> Pour compiler avec pdflatex <<
+\usepackage[french]{babel}            %% Français
+\NoAutoSpacing                        %% Retire l'espacement devant «:»
+\usepackage{geometry}                 %% Agrandir les marges
+\geometry{left=2.5cm, right=2.5cm, top=2.25cm}
+\setlength{\parskip}{\baselineskip}   %% Ajouter espacement entre lignes
+\setlength{\parindent}{0pt}           %% Retirer indentation
+\usepackage{fancyhdr}                 %% En-têtes/pieds de page
+\pagestyle{fancy}                     %%
+\fancyhf{}                            %%
+\fancyhead[R]{\session}               %%
+\fancyhead[L]{\sigle~--~\coursentete} %%
+\fancyhead[C]{\evaluation}            %%
+\fancyfoot[C]{\thepage}               %%
+
+%% Packages
+\usepackage[dvipsnames]{xcolor}       %% Plus de couleurs
+\usepackage{amsmath,amssymb}          %% Maths
+\usepackage{mathtools}                %% \coloneqq
+\usepackage{enumerate}                %% Extension de \begin{enumerate}
+\usepackage{exsheets}                 %% Environnements d'exercices
+\newcommand*\pointsformat[1]{{\scriptsize#1}}
+\SetupExSheets{                       %%
+  question/name        = {Question},  %%
+  points/name          = {\scriptsize pt/s},
+  points/bonus-name    = {\scriptsize pt/s},
+}                                     %%
+\usepackage{tikz}                     %% Dessins
+\usetikzlibrary{shapes, positioning}  %%
+\usepackage{hyperref}                 %% Hyperliens
+\hypersetup{                          %%
+    colorlinks,                       %%
+    linkcolor={blue!70!black},        %%
+    citecolor={blue!70!black},        %%
+    urlcolor={red!70!black}           %%
+}                                     %%
+\usepackage[noline, onelanguage, french,
+  noend]{algorithm2e}                 %% Algorithmes
+\usepackage{fontawesome}              %% Icônes
+
+%% Virgules francophones dans pointage
+%%  (tiré de https://tex.stackexchange.com/a/396982/68991)
+\usepackage[locale=FR, detect-weight]{siunitx}
+\ExplSyntaxOn
+\cs_set_protected:Npn \exsheets_num:n #1
+ {
+  \num{\fp_eval:n{#1}}
+ }
+\ExplSyntaxOff
+
+%% Bonus
+\newcommand{\avance}{{\large$\bigstar$}}         %% Symbole pour bonus
+\newcommand{\avancepts}{{\scriptsize$\bigstar$}} %%
+
+%% Algorithmes
+\newcommand{\N}{\mathbb{N}}                      %% Entiers naturels
+\renewcommand{\O}{\mathcal{O}}                   %% Notation O(·)
+\SetKwRepeat{Do}{faire}{tant que}                %% Structure do..while
+\newcommand{\algskip}{\vspace{3pt}}              %% Espacement vertical
+\definecolor{colComment}{rgb}{0.13, 0.55, 0.13}  %% Commentaires de couleur
+\newcommand\commentstyle[1]{\ttfamily\textcolor{colComment}{#1}}
+\SetCommentSty{commentstyle}                     %%
+
+%% Commande de titre
+\newcommand{\maketitlecustom}{%
+  \begin{center}
+    \begin{tabular}{c}
+      \Large \sigle~--~\cours         \\[3pt]
+      \large Université de Sherbrooke \\[10pt]
+      \LARGE \textbf{\evaluation}     \\[10pt]
+    \end{tabular}
+    \begin{tabular}{lp{6.25cm}}
+      Enseignant:     & \enseignant   \\
+      Date de remise: & \remise       \\
+      À réaliser:     & \equipes      \\
+      Modalités:      & \modalites    \\
+      Bonus:          & \bonust       \\
+      Pointage:       & max.\ \pointssum*~points + \bonussum*~points bonus
+    \end{tabular}
+  \end{center}
+}
+
+%% Information de l'évaluation
+\newcommand{\evaluation}{Devoir 2}
+\newcommand{\remise}{mercredi 7 octobre 2020 à 10h29}
+\newcommand{\modalites}{remettre en ligne sur \href{http://opus.dinf.usherbrooke.ca/}{Turnin}}
+\newcommand{\equipes}{en équipe de deux {\scriptsize ou individuellement}}
+\newcommand{\bonust}{les questions bonus sont indiquées par \avance{}}
+
+\newcommand{\sigle}{IFT436}
+\newcommand{\cours}{Algorithmes et structures de données}
+\newcommand{\coursentete}{Algorithmes et struct.\ de données}
+\newcommand{\session}{Automne 2020}
+\newcommand{\enseignant}{Michael Blondin}
+
+%% Contenu
+\begin{document}
+
+\maketitlecustom
+
+\SetupExSheets{
+  question/name        = {Question},
+  points/name          = {\scriptsize pt/s},
+  points/bonus-name    = {\scriptsize pt/s},
+  points/number-format = \pointsformat,
+  points/bonus-format  = \pointsformat,
+}
+
+%% Question 1
+\vspace*{0.5cm}
+\SetupExSheets{counter-format=qu[1]:~{Tri -- analyse d'algorithme}}
+
+\begin{question}\medskip
+  Pour cette question, nous considérons (comme dans les notes de
+  cours) que les éléments d'une séquence $s$ de $n$ éléments sont
+  numérotés de $1$ à $n$, c.-à-d.\ $s = [s[1], s[2], \ldots,
+    s[n]]$. Considérons l'algorithme de tri suivant:
+  
+  \begin{algorithm}[H]
+    \DontPrintSemicolon
+    \LinesNumbered
+    \KwIn{séquence $T$ de $n \in \N_{>0}$ éléments comparables}
+    \KwResult{séquence $T$ triée}
+    \algskip
+
+    \SetKwFunction{inv}{corriger-inv}
+    \SetKwFunction{trier}{trier}
+    \SetKwProg{myproc}{}{}{}
+
+    \myproc{\trier{$T$}$\mathtt{:}$}{
+      \myproc(\tcp*[f]{sous-routine avec accès à $T$}){%
+        \inv{$j, k$}$\mathtt{:}$}{
+        \If{$T[j] > T[k]$}{
+          $T[j] \leftrightarrow T[k]$
+          \tcp*{inverser le contenu de $T[j]$ et $T[k]$}
+          \Return{\textit{faux}}
+        }
+        \Else{
+          \Return{\textit{vrai}}
+        }
+      }
+      \algskip
+      \algskip
+
+      $m \leftarrow n \div 2$\;
+      \algskip
+      
+      \Do{$\neg \textit{terminé}$}{
+        $\textit{terminé} \leftarrow \textit{vrai}$\;
+        \algskip
+        
+        \For{$i \in [1..m]$}{
+          $\textit{terminé} \leftarrow \inv{$2i - 1, 2i$}
+                                       \land \textit{terminé}$\;
+        }
+        \algskip
+        
+        \For{$i \in [1..m]$}{
+          \If{$2i < n$}{
+            $\textit{terminé} \leftarrow \inv{$2i, 2i + 1$}
+                                         \land \textit{terminé}$\;
+          }
+        }
+      }
+
+      \algskip
+      \Return{$T$}\;
+    }
+  \end{algorithm}
+
+  \begin{enumerate}[(a)]
+    \setlength\itemsep{15pt}
+    
+  \item Afin \marginpar{\addpoints{2}} vous familiariser avec
+    l'algorithme, pour chacune des entrées suivantes, exécutez
+    $\trier(T)$ et donnez le contenu de $T$ à la fin de chaque tour de
+    la boucle \textbf{faire ... tant que}:\medskip
+    \begin{itemize}
+      \setlength\itemsep{5pt}
+      
+    \item $T = [66, 99, 100, 88, 77, 200]$;
+
+    \item $T = [80, 20, 30, 40, 50, 60, 10]$;
+
+    \item $T = [1002, 1000, 1001, 1006, 1004, 1005]$.
+
+    \end{itemize}
+
+  \item Expliquez \marginpar{\addpoints{2}} brièvement, en mots, le
+    fonctionnement de l'algorithme.
+
+  \item Montrez \marginpar{\addpoints{3}} que si une séquence $s$ de
+    $n$ éléments n'est \emph{pas} triée, alors il existe $i \in
+    [1..n]$ tel que $s[i] > s[i+1]$.\label{itm:inv:adj}
+
+  \item Expliquez \marginpar{\addpoints{3}} pourquoi l'algorithme
+    termine et est correct. \\[-25pt]
+
+  \item[] \hfill \emph{Indice: considérez~\eqref{itm:inv:adj} et les
+    propriétées des inversions vues en classe.}
+
+  \item Analysez \marginpar{\addpoints{3}} le temps d'exécution dans
+    le pire cas afin de montrer qu'il appartient à $\O(n^3)$.
+
+  \item Argumentez \marginpar{\addpoints{4}} que le temps d'exécution
+    dans le pire cas appartient à $\Omega(n^2)$. \\[-25pt]
+
+  \item[] \hfill \emph{Indice: pensez aux \og pires entrées \fg{} possibles.}
+
+  \item Le temps d'exécution \marginpar{\addpoints{3}} de l'algorithme
+    dans le meilleur cas appartient-il à $\O(n)$? Justifiez votre
+    réponse.
+
+  \vspace*{0.75cm}
+    
+  \item[\avance{}] Montrez \marginpar{\avancepts{} \addbonus{2.5}} que
+    le temps d'exécution dans le pire cas appartient à
+    $\Theta(n^2)$.
+
+  \end{enumerate}
+\end{question}
+
+%% Question 2
+\vspace*{30pt}
+\SetupExSheets{counter-format=qu[1]:~{Tri -- adaptation d'algorithme}}
+
+\begin{question}\medskip
+  Soit $s$ une séquence d'éléments comparables. Nous écrivons $|s|_x$
+  afin de dénoter le nombre d'occurrences de $x$ dans $s$. Un
+  \emph{mode} $m$ de $s$ est une valeur qui apparaît un nombre maximal
+  de fois dans $s$; autrement dit, tel que $|s|_m = \max\{|s|_x : x
+  \in s\}$. Par exemple, $s = [42, 42, 0, 1, 0, 42, 0]$ possède deux
+  modes: $0$ et $42$.
+
+  \begin{enumerate}[(a)]
+  \setlength\itemsep{20pt}
+
+  \item Adaptez \marginpar{\addpoints{7}} l'algorithme de tri rapide
+    afin de résoudre ce problème en temps $\O(n \log n)$:
+    \begin{quote}
+      \medskip
+      \begin{tabular}{ll}
+        \textsc{Entrée}: & une séquence $s$ de $n \in \N_{>0}$
+        éléments comparables \\[2pt]
+        
+        \textsc{Sortie}: & un mode $m$ de $s$
+      \end{tabular}
+      \medskip
+    \end{quote}
+
+    Vous n'avez \emph{pas} à analyser le temps d'exécution de votre
+    algorithme. On suppose que vous avez accès à une instruction
+    $\texttt{médiane}(s)$ qui retourne la médiane d'une séquence $s$
+    de $n > 0$ éléments en temps $\O(n)$. Cela permet donc
+    d'implémenter une version idéalisée du tri rapide.\bigskip
+
+    \emph{Remarque: on pourrait trouver un mode en triant d'abord,
+      puis en effectuant un parcours linéaire; mais ce n'est pas ce
+      qui est demandé, nous cherchons une approche récursive qui
+      résout le problème sans prétraitement.}\bigskip
+
+    \emph{Précision: Dans ce contexte, la médiane réfère à la valeur
+      qui se retrouve à la position $\lceil n / 2 \rceil$ lorsque $s$
+      est triée; par ex.\ la médiane de $[20, 40, 10, 50, 60, 30]$ est
+      $30$ et la médiane de $[70, 20, 40, 10, 50, 60, 30]$ est
+      $40$. Ainsi, pour les séquences de taille paire, on ne prend
+      \emph{pas} la moyenne des deux valeurs milieux comme en
+      statistiques.}
+
+  \item Afin \marginpar{\addpoints{3}} d'illustrer le fonctionnement
+    de votre algorithme, tracez son arbre de récursion sur entrée: \[s
+    = [10, 20, 20, 20, 10, 30, 70, 20, 80, 30, 60, 40, 20, 10, 50, 10,
+      70, 80].\]   
+  \end{enumerate}
+\end{question}
+
+%% Question 3
+\pagebreak
+\SetupExSheets{counter-format=qu[1]:~{Algorithmes de graphes}}
+
+\begin{question}\medskip
+  Considérons un jeu vidéo non linéaire où la complétion d'un niveau
+  permet de passer à un niveau subséquent parmi certains choix. La
+  première fois qu'on complète un niveau, on obtient une étoile. Il
+  est possible de rejouer un niveau si on y revient, mais cela
+  n'augmente pas le nombre d'étoiles obtenues. Par exemple, supposons
+  que le jeu soit constitué de huit niveaux organisés de cette
+  manière:
+
+  \begin{center}
+    \vspace*{-8pt}
+    \begin{tikzpicture}[auto, thick, transform shape, scale=0.95]
+      %% Couleurs
+      \colorlet{colA}{orange}
+      \colorlet{colB}{Cerulean}
+      \colorlet{colC}{RoyalPurple}
+      \colorlet{colD}{ForestGreen}
+      \colorlet{colE}{OrangeRed}
+      
+      %% Niveaux
+      \tikzstyle{niveau} = [ellipse, draw, minimum width=30pt];
+
+      \node[niveau, fill=colA]                                  (v0) {};
+      \node[niveau, fill=colB, above right=30pt and 30pt of v0] (v1) {};
+      \node[niveau, fill=colB, above right=-3pt and 60pt of v1] (v2) {};
+      \node[niveau, fill=colC, below right= 5pt and 40pt of v0] (v3) {};
+      \node[niveau, fill=colD, below right= 0pt and 40pt of v3] (v4) {};
+      \node[niveau, fill=colD, above right= 9pt and 30pt of v4] (v5) {};
+      \node[niveau, fill=colD, below right= 0pt and 60pt of v4] (v6) {};
+      \node[niveau, fill=colE, above right= 5pt and 80pt of v5] (v7) {};
+
+      %% Chemins
+      \path[->, very thick]
+      (v0) edge[bend right=8]   node {} (v3)
+      (v1) edge[bend left=10]   node {} (v2)
+      (v2) edge[bend left=10]   node {} (v1)
+      (v3) edge[out=10, in=-90] node {} (v2)
+      (v3) edge[bend right=5]   node {} (v4)
+      (v4) edge[bend left=15]   node {} (v5)
+      (v5) edge[bend left=10]   node {} (v6)
+      (v6) edge[bend left= 5]   node {} (v4)
+
+      (v0) edge[out=10, in=180, looseness=1.5] node {} (v1)
+      (v2) edge[out= 0, in=180, looseness=1.5] node {} (v7)
+      (v5) edge[out= 0, in=240, looseness=1.5] node {} (v7)
+      ;
+
+      %% Icônes
+      \newcommand{\personnage}{\LARGE\faThemeisle}
+      \newcommand{\building}{\LARGE\textcolor{colC!80!black}{\faBank}}
+      \newcommand{\nuage}{\huge\textcolor{colB!50!black}{\faCloud}}
+      \newcommand{\arbre}{\LARGE\textcolor{colD!50!black}{\faTree}}
+      \newcommand{\chateau}{\Huge\textcolor{colE!80!black}{\faFortAwesome}}
+
+      \node[xshift=-22pt, yshift= 10pt, scale=1.00] at (v0) {\personnage};
+      \node[xshift=  0pt, yshift= 30pt, scale=1.10] at (v1) {\nuage};
+      \node[xshift= 25pt, yshift= 35pt, scale=1.05] at (v1) {\nuage};
+      \node[xshift= 55pt, yshift= 28pt, scale=1.15] at (v1) {\nuage};
+      \node[xshift= 90pt, yshift= 35pt, scale=1.00] at (v1) {\nuage};
+      \node[xshift=110pt, yshift= 25pt, scale=1.10] at (v1) {\nuage};
+      \node[xshift=-15pt, yshift= 15pt, scale=1.00] at (v3) {\building};
+      \node[xshift= 20pt, yshift= 18pt, scale=0.90] at (v3) {\building};
+      \node[xshift= 15pt, yshift= 20pt, scale=1.00] at (v4) {\arbre};
+      \node[xshift= 40pt, yshift= -5pt, scale=1.25] at (v4) {\arbre};
+      \node[xshift= 75pt, yshift= 27pt, scale=0.90] at (v4) {\arbre};
+      \node[xshift=110pt, yshift= -7pt, scale=1.30] at (v4) {\arbre};
+      \node[xshift=130pt, yshift=  5pt, scale=1.15] at (v4) {\arbre};
+      \node[xshift= 25pt, yshift= 18pt, scale=1.00] at (v7) {\chateau};
+      
+      %% Étoiles
+      \foreach \x in {0,...,7} {
+        \node[yshift=11pt] at (v\x) {\textcolor{Dandelion}{\faStar}};
+      }
+    \end{tikzpicture}
+    \vspace*{-12pt}
+  \end{center}
+
+  Le personnage, qui débute au premier niveau (à gauche), peut obtenir
+  quatre étoiles en complétant les deux niveaux du ciel, puis en se
+  déplaçant au château (le dernier niveau à droite). Toutefois, la
+  solution qui maximise le nombre d'étoiles visite la cité, suivie
+  d'un tour des trois niveaux de la forêt, complété d'une visite du
+  château.
+
+  Cherchons à automatiser la recherche d'un tel score maximal. Nous
+  supposons qu'un jeu est représenté par un graphe dirigé de $n$
+  sommets et $m$ arêtes, sous forme de liste d'adjacence. Pour chacune
+  des questions suivantes, vous pourrez obtenir tous les points si
+  votre algorithme fonctionne en temps $\O(n + m)$ dans le pire cas.
+  
+  \begin{enumerate}[(a)]
+    \setlength\itemsep{10pt}
+        
+  \item Nous \marginpar{\addpoints{3}} disons qu'un jeu est \emph{bien
+    conçu} si:\smallskip
+
+    \begin{itemize}
+    \item il possède un niveau accessible à partir d'aucun autre (le
+      \emph{premier niveau});
+
+    \item il possède un niveau qui ne peut pas en atteindre d'autres
+      (le \emph{dernier niveau});
+
+    \item tous les niveaux sont accessibles à partir du premier niveau;
+
+    \item tous les niveaux peuvent atteindre le dernier niveau.
+    \end{itemize}
+    \medskip
+    
+    \strong{Expliquez comment déterminer algorithmique si un jeu est
+      bien conçu.} Vous pouvez le faire en mots, sous forme de
+    pseudocode, en invoquant des algorithmes vus en classes, etc.
+
+  \item Nous disons que deux niveaux $x$ et $y$ appartiennent au même
+    \emph{monde} si $x$ peut atteindre $y$ et vice-versa, avec un
+    nombre arbitraire de déplacements. Par exemple, il y a cinq mondes
+    dans le jeu ci-dessus. En particulier, les mondes du ciel, de la
+    cité et de la forêt contiennent respectivement deux, un et trois
+    niveaux.\label{itm:mondes}\medskip
+
+    \begin{enumerate}[(i)]
+    \setlength\itemsep{5pt}
+
+    \item Supposons \marginpar{\addpoints{6}} qu'on ait accès à une
+      routine qui répond, en temps constant, aux questions de cette
+      forme:\label{itm:graphe:mondes}
+
+    \begin{center}
+      \emph{le niveau $x$ peut-il atteindre le niveau $y$ avec un
+        nombre arbitraire de déplacements?}
+    \end{center}
+
+    \strong{Donnez un algorithme qui identifie les mondes d'un jeu
+      bien conçu.} Il doit numéroter chaque niveau avec un nombre de
+    $[1..k]$, où $k$ est le nombre de mondes. L'ordre dans lequel ils
+    sont attribués n'importe pas, pourvu que deux niveaux aient le même
+    nombre ssi ils font partie du même monde.
+
+  \item Est-ce \marginpar{\addpoints{3}} possible de passer d'un monde
+    $i$ vers un monde $j \neq i$ et d'éventuellement revenir au
+    monde~$i$? Autrement dit, le \og graphe des mondes \fg{} est-il
+    acyclique? Justifiez brièvement.
+    
+    \end{enumerate}
+    
+  \item \strong{Donnez \marginpar{\addpoints{8}} un algorithme qui
+    détermine le nombre \emph{maximal} d'étoiles qu'on peut obtenir
+    dans un jeu bien conçu, où chaque monde ne contient qu'\emph{un
+      seul} niveau.}\smallskip
+    
+    \hfill\emph{Indice: pensez à un ordre dans lequel considérer les
+      niveaux.}\bigskip
+
+  \item[\avance{}] Donnez \marginpar{\avancepts{} \addbonus{2.5}} un
+    algorithme qui effectue la même tâche, mais cette fois sans
+    restriction sur la taille des mondes.
+    
+  \end{enumerate}
+\end{question}
+
+\end{document}
