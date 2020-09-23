@@ -19,7 +19,7 @@ def fusion(x, y):
     elif y is None:
         return x
     else:
-        # Identifier la première valeur
+        # Identifier la première valeur de la liste fusionnée
         if x.val <= y.val:
             z = x
             x = x.succ
@@ -27,7 +27,7 @@ def fusion(x, y):
             z = y
             y = y.succ
 
-        # Construire le reste de la liste
+        # Construire le reste de la liste fusionnée
         debut = z
 
         while (x is not None) or (y is not None):
@@ -54,12 +54,12 @@ def tri_fusion(s):
             x = x.succ
             y = y.succ.succ
 
-        # Scinder s en deux
+        # Scinder s en deux: x et y
         y      = x.succ
         x.succ = None
         x      = s
 
-        # Trier récursivement et fusionner
+        # Trier x et y récursivement, puis fusionner
         return fusion(tri_fusion(x), tri_fusion(y))
 
 # Exemple
