@@ -4,8 +4,8 @@ class Elem:
         self.succ = succ
 
     def __str__(self):
-        x = self
         s = []
+        x = self
 
         while (x is not None):
             s.append(x.val)
