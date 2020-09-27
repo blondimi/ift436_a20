@@ -103,7 +103,7 @@
      {
          let a_remplacer = grille.contenu[x][y];
          let a_traiter   = [[x, y]];
-         let a_remplir   = (i, j) => (grille.contenu[i][j] == a_remplacer);
+         let est_remplie = (i, j) => (grille.contenu[i][j] != a_remplacer);
 
          // Traiter une cellule à remplir
          let traiter = function() {
@@ -113,16 +113,17 @@
 
                  do {
                      [i, j] = extraire(a_traiter);
-                 } while (!a_remplir(i, j) && a_traiter.length > 0);
+                 } while (est_remplie(i, j) && a_traiter.length > 0);
              
                  // Remplir la cellule (s'il faut le faire)
-                 if (a_remplir(i, j)) {
+                 if (!est_remplie(i, j)) {
                      changerPixel(i, j, couleur);
-                     
+
+                     // Explorer les voisins
                      for (let [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) {
                          let [i_, j_] = [i + dx, j + dy];
                          
-                         if (contient(i_, j_) && a_remplir(i_, j_))
+                         if (contient(i_, j_) && !est_remplie(i_, j_))
                              a_traiter.push([i_, j_]);
                      }
                  }
