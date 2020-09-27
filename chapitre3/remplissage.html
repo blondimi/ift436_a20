@@ -50,13 +50,11 @@
 
      function marquer(evenement)
      {
-         let conv = (v) => Math.floor(grille.taille / canvas.width * v);
-         let rect = canvas.getBoundingClientRect();
-
-         let action = col_mode.value == "dessiner" ? changerPixel : remplir;
-
-         let x = conv(evenement.clientX - rect.left);
-         let y = conv(evenement.clientY - rect.top);
+         let conv   = (v) => Math.floor(grille.taille / canvas.width * v);
+         let rect   = canvas.getBoundingClientRect();
+         let x      = conv(evenement.clientX - rect.left);
+         let y      = conv(evenement.clientY - rect.top);
+         let action = (col_mode.value == "dessiner" ? changerPixel : remplir);
 
          clearInterval(animation);
 
