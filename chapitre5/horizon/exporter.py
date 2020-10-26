@@ -139,12 +139,3 @@ if __name__ == "__main__":
     # blocs = [(n - i, n - i, n + i + 1) for i in range(n)]
 
     print(exporter(blocs))
-
-    # Afin de convertir en PDF:
-    #
-    # 1. Convertir le paysage en LaTeX: python3 exporter.py > paysage.tex
-    # 2. Compiler: par ex.              pdflatex paysage.tex
-    # 3. Ouvrir paysage.pdf
-    #
-    # Requiert le package TikZ pour LaTeX
-    

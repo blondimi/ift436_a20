@@ -70,11 +70,3 @@ if __name__ == "__main__":
     num_disques = 3
     
     print(exporter(num_disques))
-
-    # Afin de convertir une solution en PDF:
-    #
-    # 1. Convertir la grille en LaTeX: python3 exporter.py > hanoi.tex
-    # 2. Compiler: par ex.             pdflatex hanoi.tex
-    # 3. Ouvrir hanoi.pdf
-    #
-    # Requiert le package TikZ pour LaTeX
