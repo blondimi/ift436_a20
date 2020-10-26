@@ -47,7 +47,7 @@ def somme_max_rec(s):
         return max(a, b, c_gauche + c_droite)
 
 # Exemple des notes de cours
-if __name__ == "__main__":    
+if __name__ == "__main__":
     s = [3, 1, -5, 4, -2, 1, 6, -3]
 
     print("Somme contigüe maximale (itératif):", somme_max_iter(s))
