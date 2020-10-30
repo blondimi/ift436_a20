@@ -1,0 +1,444 @@
+\documentclass{article}
+
+%% Mise en pages
+\usepackage{fontspec}                 %% >> Pour compiler
+\setmainfont{XCharter}                %%                 avec xelatex <<
+%\usepackage[utf8]{inputenc}          %% >> Pour compiler avec pdflatex <<
+\usepackage[french]{babel}            %% Français
+\NoAutoSpacing                        %% Retire l'espacement devant «:»
+\usepackage{geometry}                 %% Agrandir les marges
+\geometry{left=2.5cm, right=2.5cm, top=2.25cm}
+\setlength{\parskip}{\baselineskip}   %% Ajouter espacement entre lignes
+\setlength{\parindent}{0pt}           %% Retirer indentation
+\usepackage{fancyhdr}                 %% En-têtes/pieds de page
+\pagestyle{fancy}                     %%
+\fancyhf{}                            %%
+\fancyhead[R]{\session}               %%
+\fancyhead[L]{\sigle~--~\coursentete} %%
+\fancyhead[C]{\evaluation}            %%
+\fancyfoot[C]{\thepage}               %%
+
+%% Packages
+\usepackage[dvipsnames]{xcolor}       %% Plus de couleurs
+\usepackage{amsmath,amssymb}          %% Maths
+\usepackage{mathtools}                %% \coloneqq
+\usepackage{enumerate}                %% Extension de \begin{enumerate}
+\usepackage{exsheets}                 %% Environnements d'exercices
+\newcommand*\pointsformat[1]{{\scriptsize#1}}
+\SetupExSheets{                       %%
+  question/name        = {Question},  %%
+  points/name          = {\scriptsize pt/s},
+  points/bonus-name    = {\scriptsize pt/s},
+}                                     %%
+\usepackage{tikz}                     %% Dessins
+\usetikzlibrary{shapes, positioning}  %%
+\usepackage{hyperref}                 %% Hyperliens
+\hypersetup{                          %%
+    colorlinks,                       %%
+    linkcolor={blue!70!black},        %%
+    citecolor={blue!70!black},        %%
+    urlcolor={red!70!black}           %%
+}                                     %%
+\usepackage[noline, onelanguage, french,
+  noend]{algorithm2e}                 %% Algorithmes
+\usepackage{fontawesome}              %% Icônes
+\usepackage{multicol}
+
+%% Virgules francophones dans pointage
+%%  (tiré de https://tex.stackexchange.com/a/396982/68991)
+\usepackage[locale=FR, detect-weight]{siunitx}
+\ExplSyntaxOn
+\cs_set_protected:Npn \exsheets_num:n #1
+ {
+  \num{\fp_eval:n{#1}}
+ }
+\ExplSyntaxOff
+
+%% Bonus
+\newcommand{\avance}{{\large$\bigstar$}}         %% Symbole pour bonus
+\newcommand{\avancepts}{{\scriptsize$\bigstar$}} %%
+
+%% Algorithmes
+\newcommand{\N}{\mathbb{N}}                      %% Entiers naturels
+\renewcommand{\O}{\mathcal{O}}                   %% Notation O(·)
+\SetKwRepeat{Do}{faire}{tant que}                %% Structure do..while
+\newcommand{\algskip}{\vspace{3pt}}              %% Espacement vertical
+\definecolor{colComment}{rgb}{0.13, 0.55, 0.13}  %% Commentaires de couleur
+\newcommand\commentstyle[1]{\ttfamily\textcolor{colComment}{#1}}
+\SetCommentSty{commentstyle}                     %%
+
+%% Couleurs
+\colorlet{colEmph}{cyan!80!blue}
+\colorlet{colEmph2}{magenta!80!black}
+\colorlet{colEmph3}{green!70!black}
+\colorlet{colEmph4}{blue!80!purple}
+\colorlet{colEmph5}{orange}
+
+\colorlet{colBad}{red}
+\colorlet{colWarning}{orange}
+
+%% Commande de titre
+\newcommand{\maketitlecustom}{%
+  \begin{center}
+    \begin{tabular}{c}
+      \Large \sigle~--~\cours         \\[3pt]
+      \large Université de Sherbrooke \\[10pt]
+      \LARGE \textbf{\evaluation}     \\[10pt]
+    \end{tabular}
+    \begin{tabular}{lp{7.35cm}}
+      Enseignant:     & \enseignant   \\
+      Date de remise: & \remise       \\
+      À réaliser:     & \equipes      \\
+      Modalités:      & \modalites    \\
+      Bonus:          & \bonust       \\
+      Pointage:       & max.\ \pointssum*~points + \bonussum*~points bonus \\
+      Consignes       & \consignes
+    \end{tabular}
+  \end{center}
+}
+
+%% Information de l'évaluation
+\newcommand{\evaluation}{Devoir 3}
+\newcommand{\remise}{mercredi 11 novembre 2020 à 10h29}
+\newcommand{\modalites}{remettre en ligne sur \href{http://opus.dinf.usherbrooke.ca/}{Turnin} dans un fichier PDF}
+\newcommand{\equipes}{en équipe de deux {\scriptsize ou individuellement}}
+\newcommand{\bonust}{les questions bonus sont indiquées par \avance{}}
+\newcommand{\sigle}{IFT436}
+\newcommand{\cours}{Algorithmes et structures de données}
+\newcommand{\coursentete}{Algorithmes et struct.\ de données}
+\newcommand{\session}{Automne 2020}
+\newcommand{\enseignant}{Michael Blondin}
+\newcommand{\consignes}{commentez et décrivez les grandes lignes de
+  vos algorithmes afin de faciliter leur compréhension}
+
+%% Contenu
+\begin{document}
+
+\maketitlecustom
+
+\SetupExSheets{
+  question/name        = {Question},
+  points/name          = {\scriptsize pt/s},
+  points/bonus-name    = {\scriptsize pt/s},
+  points/number-format = \pointsformat,
+  points/bonus-format  = \pointsformat,
+}
+
+\vspace*{-10pt}
+
+\begin{question}
+  \begin{enumerate}[(a)]
+    \setlength\itemsep{15pt}
+    
+  \item Soit $\mathcal{P}_n$ l'ensemble des pavages, d'une grille $4
+    \times n$, constitués de tuiles de cette forme (sans
+    rotations):\bigskip
+    \begin{center}
+      \hfill
+      \hfill
+      \hfill
+      \begin{tikzpicture}[scale=0.35, transform shape]
+        \fill[colEmph2] (0, 0) -- (0, 4) -- (1, 4) -- (1, 0) -- cycle;%
+        \draw[white] (0, 1) -- (1, 1);%
+        \draw[white] (0, 2) -- (1, 2);%
+        \draw[white] (0, 3) -- (1, 3);%
+      \end{tikzpicture}%
+      \hfill
+      \begin{tikzpicture}[scale=0.35, transform shape]
+        \fill[colEmph4] (0, 0) -- (0, 2) -- (1, 2) -- (1, 0) -- cycle;%
+        \draw[white] (0, 1) -- (1, 1);%
+      \end{tikzpicture}%
+      \hfill
+      \begin{tikzpicture}[scale=0.35, transform shape]
+        
+        \fill[colEmph5] (0, 0) -- (0, 1) -- (1, 1) -- (1, 3) -- (0, 3)
+        -- (0, 4) -- (2, 4) -- (2, 0) -- cycle;
+        
+        \draw[white] (0, 1) -- (2, 1);%
+        \draw[white] (0, 2) -- (2, 2);%
+        \draw[white] (0, 3) -- (2, 3);%
+        \draw[white] (1, 0) -- (1, 4);%
+      \end{tikzpicture}%
+      \hfill
+      \begin{tikzpicture}[scale=0.35, transform shape]
+        
+        \fill[colEmph] (0, 0) -- (0, 2) -- (1, 2) -- (1, 4) -- (2, 4) --
+        (2, 0) -- cycle;
+        
+        \draw[white] (0, 1) -- (2, 1);%
+        \draw[white] (0, 2) -- (2, 2);%
+        \draw[white] (0, 3) -- (2, 3);%
+        \draw[white] (1, 0) -- (1, 4);%
+      \end{tikzpicture}%
+      \hfill
+      \begin{tikzpicture}[scale=0.35, transform shape]
+        
+        \fill[colEmph3] (1, 0) -- (1, 2) -- (0, 2) -- (0, 4) -- (2, 4)
+        -- (2, 0) -- cycle;
+        
+        \draw[white] (0, 1) -- (2, 1);%
+        \draw[white] (0, 2) -- (2, 2);%
+        \draw[white] (0, 3) -- (2, 3);%
+        \draw[white] (1, 0) -- (1, 4);%
+      \end{tikzpicture}%
+      \hfill
+      \hfill
+      \hfill
+      \hfill
+      \hfill
+  \end{center}\bigskip\medskip
+
+  \begin{enumerate}[(i)]
+    \setlength\itemsep{10pt}
+    
+  \item Donnez \marginpar{\addpoints{4}} une récurrence linéaire $t$
+    telle que $t(n) = |\mathcal{P}_n|$ pour tout $n \in \N_{\geq
+      1}$. Expliquez comment vous avez obtenu votre récurrence.
+
+  \item Appliquez \marginpar{\addpoints{5}} la méthode de résolution
+    de récurrences linéaires présentée en classe afin d'obtenir une
+    forme close pour $t$. Laissez une trace de votre démarche.
+
+  \item Donnez \marginpar{\addpoints{3}} la complexité asymptotique de
+    $t$ aussi précisément que possible avec la notation
+    $\Theta$. Justifiez.
+  \end{enumerate}
+
+  
+  \item Au tout premier cours de la session, nous avons brièvement vu
+    cet algorithme:\smallskip
+
+    \begin{algorithm}[H]
+      \DontPrintSemicolon
+      \KwIn{séquence $s$ de $n \in \N_{\geq 1}$ entiers}
+      \Sortie{$\max\{s[i] : 1 \leq i \leq n\}$}
+      
+      \algskip
+      
+      \SetKwFunction{fmax}{max-rec}
+      \SetKwProg{myproc}{}{}{}
+      
+      \myproc{\fmax{$s$}:}{
+        \If{$n = 1$}{\Return{$s[1]$}}
+        \Else{
+          $m\phantom{'} \leftarrow \fmax{$s[1 : n \div 2]$}$\;
+          $m' \leftarrow \fmax{$s[n \div 2 + 1 : n]$}$\;
+          
+          \algskip
+          \lIf{$m > m'$}{\Return{$m$}}
+          \lElse{\hspace*{44pt}\Return{$m'$}}
+        }
+      }
+    \end{algorithm}
+    
+    \begin{enumerate}[(i)]
+      \setlength\itemsep{10pt}
+      
+    \item Donnez \marginpar{\addpoints{4}} une récurrence qui décrit le
+      temps d'exécution \emph{exact} de $\fmax$ par rapport à $n = |s|$
+      (donc avec les constantes). Considérez ces opérations comme
+      élémentaires: \setlength\columnsep{-4cm}
+      \begin{multicols}{2}
+        \begin{itemize}
+          \setlength\itemsep{1pt}
+          
+        \item comparaison;
+          
+        \item addition;
+          
+        \item division;
+          
+        \item affectation;
+          
+        \item accès au $i^\text{ème}$ élément d'une séquence;
+          
+        \item obtention d'une sous-séquence $s[i : j]$ (\og
+          \href{https://en.wikipedia.org/wiki/Array_slicing}{
+            \emph{slicing}} \fg{}).
+
+    \end{itemize}
+    \end{multicols}
+
+    \item L'algorithme $\fmax$ est-il \marginpar{\addpoints{4}} plus
+      rapide (asymptotiquement) qu'un algorithme itératif usuel pour
+      le calcul du maximum d'une séquence? Justifiez. Si cela vous
+      aide, vous pouvez supposer que $n$ est une puissance de deux.
+  \end{enumerate}
+    
+  \end{enumerate}
+\end{question}
+
+\pagebreak
+
+\begin{question}
+  \begin{enumerate}[(a)]
+    \setlength\itemsep{7pt}
+
+  \item Imaginons \marginpar{\addpoints{10}} un jeu où un diamant se
+    trouve au sommet d'une colline de blocs. Vous devez atteindre le
+    diamant avec un projectile. Vous avez accès à une decription de la
+    colline sous forme d'une séquence $c$ où $c[i] \in \N$ indique le
+    nombre de blocs de la $i^\text{ème}$ colonne de la colline. Par
+    exemple, $c = [1, 2, 4, 6, 5, 4, 3, 1, 0]$ décrit cette
+    colline:\bigskip
+    \begin{center}
+      \begin{tikzpicture}[very thick, scale=0.58, transform shape]
+        \colorlet{colBlocks}{brown!20}
+        
+        \foreach \y in {0,...,0}
+        \draw[fill=colBlocks] (0, \y) -- (0, \y+1) -- (1, \y+1)
+        -- (1, \y) -- cycle;
+      
+        \foreach \y in {0,...,1}
+        \draw[fill=colBlocks] (1, \y) -- (1, \y+1) -- (2, \y+1)
+        -- (2, \y) -- cycle;
+      
+        \foreach \y in {0,...,3}
+        \draw[fill=colBlocks] (2, \y) -- (2, \y+1) -- (3, \y+1)
+        -- (3, \y) -- cycle;
+        
+        \foreach \y in {0,...,5}
+        \draw[fill=colBlocks] (3, \y) -- (3, \y+1) -- (4, \y+1)
+        -- (4, \y) -- cycle;
+        
+        \foreach \y in {0,...,4}
+        \draw[fill=colBlocks] (4, \y) -- (4, \y+1) -- (5, \y+1)
+        -- (5, \y) -- cycle;
+
+        \foreach \y in {0,...,3}
+        \draw[fill=colBlocks] (5, \y) -- (5, \y+1) -- (6, \y+1)
+        -- (6, \y) -- cycle;
+
+        \foreach \y in {0,...,2}
+        \draw[fill=colBlocks] (6, \y) -- (6, \y+1) -- (7, \y+1)
+        -- (7, \y) -- cycle;
+
+        \foreach \y in {0,...,0}
+        \draw[fill=colBlocks] (7, \y) -- (7, \y+1) -- (8, \y+1)
+        -- (8, \y) -- cycle;
+
+        \draw (8, 0) -- (9, 0);
+        
+        \node[scale=2.25, colEmph!90!blue] at (3.5, 6.5) {\faDiamond};
+
+        \foreach \x in {1,...,9}
+        \node[font=\large] at (\x - 0.5, -0.5) {\textsf{\x}};
+
+        \foreach \y in {1,...,7}
+        \node[font=\large] at (-0.5, \y-0.5) {\textsf{\y}};
+
+      \end{tikzpicture}
+    \end{center}\bigskip\smallskip
+    
+    Formellement, une séquence $c$ de $n \in \N_{\geq 3}$ nombres
+    naturels forme une \emph{colline} s'il existe $i \in [n]$ tel que
+    $$c[1] < c[2] < \cdots < c[i - 1] < c[i] > c[i + 1] > \cdots >
+    c[n-1] > c[n].$$ Cet indice $i$ indique la colonne du sommet de
+    $c$. Le diamant se trouve sur le bloc au sommet de la colline, par
+    ex.\ à la position $(4, 7)$ pour la colline ci-dessus. Vous n'avez
+    qu'un seul projectile et très peu de temps pour le lancer. Donnez
+    donc un algorithme qui résout ce problème en temps $\O(\log n)$:
+  
+    \begin{quote}
+      \vspace*{6pt}
+      \begin{tabular}{lp{10cm}}
+        \textsc{Entrée}: & séquence $c$ décrivant une colline de $n \in
+        \N_{\geq 3}$ colonnes \\[2pt]
+        
+        \textsc{Sortie}: & position $(i, j)$ du diamant de la colline $c$
+      \end{tabular}
+      \vspace*{5pt}
+    \end{quote}
+
+  \item Imaginons \marginpar{\addpoints{10}} un jeu où des gardes
+    munis de sarbacanes défendent une forteresse. Chaque garde se
+    situe à une \emph{po\-si\-tion} $(x, y) \in \N^2$ et surveille la
+    région $\{(a, b) \in \N^2 : a \leq x \land b \leq y\}$. Par
+    exemple, huit gardes aux positions $[(6, 4), (4, 2), (8, 1), (2,
+      6), (3, 5), (7, 3), (1, 3), (2, 1)]$ surveillent collectivement
+    cette région globale:
+
+    \begin{center}
+      \input{forteresse}
+    \end{center}\medskip
+
+    Vous désirez améliorer votre forteresse, mais n'avez plus de pièce
+    d'or. Vous désirez donc retirer autant de gardes que possible afin
+    d'obtenir des pièces en échange, et ce \emph{sans changer la
+      ré\-gion globale} surveillée par les gardes. Par exemple, on
+    peut retirer trois gardes au maximum dans le scénario
+    ci-dessus. Donnez donc un algorithme qui résout ce problème en
+    temps $\O(n \log n)$:
+
+    \begin{quote}
+      \vspace*{6pt}
+      \begin{tabular}{lp{10cm}}
+        \textsc{Entrée}: & séquence $p$ des positions des $n \in
+        \N_{\geq 1}$ gardes \\[2pt]
+        
+        \textsc{Sortie}: & plus grand nombre de gardes qu'on peut
+        retirer de $p$ sans changer la région globale surveillée
+        collectivement
+      \end{tabular}
+      \vspace*{5pt}
+    \end{quote}
+    \emph{Indice: divisez le royaume pour régner!}
+    
+  \end{enumerate}
+\end{question}
+
+\pagebreak
+
+\begin{question}
+  Donnez \marginpar{\addpoints{10}} un algorithme qui résout ce
+  problème en temps $\Theta(n^{\log_3 6})$ dans le pire cas:
+  \begin{quote}
+    \vspace*{6pt}
+    \begin{tabular}{ll}
+      \textsc{Entrée}: & $x \in \N$ représenté avec $n$ chiffres en
+      base $10$ \\[2pt]
+      
+      \textsc{Sortie}: & $x^2$
+    \end{tabular}
+    \vspace*{5pt}
+  \end{quote}
+
+  Expliquez pourquoi il fonctionne en temps $\O(n^{\log_3 6})$. Vous
+  n'avez pas à justifier l'appartenance à $\Omega(n^{\log_3 6})$.
+
+  \emph{Précision: nous faisons ces hypothèses (comme en
+  classe):}\medskip
+  \begin{itemize}
+    \setlength\itemsep{5pt}
+    
+  \item \emph{L'addition et la soustraction de deux nombres d'au plus $k$
+    chiffres s'effectue en temps $\O(k)$;}
+
+  \item \emph{Le décalage et la troncation de $k$ chiffres d'un nombre
+    s'effectue en temps $\O(k)$.}
+  \end{itemize}\bigskip
+
+  \emph{Indice: inspirez-vous de l'algorithme de multiplication rapide
+    vu en classe mais en divisant autrement.}
+
+  \vspace*{1.5cm}
+  
+  \avance{} Donnez \marginpar{\avancepts{} \addbonus{3}} un algorithme
+  plus efficace pour le cas spécifique d'un nombre $x$ composé d'un
+  seul chiffre répété, par ex.\ $x = 3333 3333 33$. Plus précisément,
+  donnez un algorithme qui résout ce problème en temps $\O(n)$:
+  \begin{quote}
+    \vspace*{6pt}
+    \begin{tabular}{ll}
+      \textsc{Entrée}: & $x \in \N$ composé d'un seul chiffre en
+      base $10$ répété $n$ fois \\[2pt]
+      
+      \textsc{Sortie}: & $x^2$
+    \end{tabular}
+    \vspace*{5pt}
+  \end{quote}  
+  Expliquez brièvement le fonctionnement de votre algorithme et
+  pourquoi il s'exécute en temps $\O(n)$.
+\end{question}
+
+\end{document}

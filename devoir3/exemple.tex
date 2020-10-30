@@ -1,0 +1,148 @@
+\documentclass{article}
+
+%% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{enumerate}
+\usepackage[noline, onelanguage, french, noend]{algorithm2e}
+\usepackage{tikz}
+
+%% Macros
+\newcommand{\N}{\mathbb{N}}
+\renewcommand{\O}{\mathcal{O}}
+\newcommand{\algdelim}{\texttt{:}}
+\newcommand{\algskip}{\vspace*{3pt}}
+\newcommand{\emptyseq}{[\,]}
+\newcommand{\lto}{\,{:}\,}
+
+%% Titre
+\title{IFT436: devoir 3}
+\author{Foo McBar}
+\date{11 novembre 2020}
+
+\begin{document}
+\maketitle
+
+%% Contenu
+\section*{Question 1}
+
+\begin{enumerate}[(a)]
+\item \leavevmode
+  
+  \begin{enumerate}[(i)]
+
+  \item
+    
+    \[
+    f(n) =
+    \begin{cases}
+      1 & \text{si } n = 0, \\
+      
+      1 & \text{si } n = 1, \\
+      
+      f(n-1) + f(n-2) & \text{sinon}.
+    \end{cases}
+    \]
+    
+  \item ...
+    
+  \item $\Theta(\sqrt{5}^n)$
+
+  \end{enumerate}
+
+\item \leavevmode
+  
+  \begin{enumerate}[(i)]
+  \item ...
+    
+  \item ...
+  \end{enumerate}
+\end{enumerate}
+
+\section*{Question 2}
+
+\begin{enumerate}[(a)]
+\item ...
+
+  \begin{algorithm}[H]
+    \DontPrintSemicolon
+    \SetKwFunction{trier}{trier}
+    \SetKwFunction{fusion}{fusion}
+    \SetKwProg{myproc}{}{}{}
+    \KwIn{séquence $s$ d'éléments comparables}
+    \Sortie{séquence $s$ triée}
+    \algskip
+    
+    \myproc{\trier{$s$}\algdelim}{
+      \myproc(\tcp*[f]{fusionne deux séq.\ triées}){\fusion{$x, y$}\algdelim}{
+        $i \leftarrow 1;\ j \leftarrow 1;\ z \leftarrow \emptyseq$\;
+        \algskip
+        
+        \While{$i \leq |x| \land j \leq |y|$}{
+          \If{$x[i] \leq y[j]$}{
+            \textbf{ajouter}\ $x[i]$\ \textbf{à}\ $z$\;
+            $i \leftarrow i + 1$\;
+          }
+          \Else{
+            \textbf{ajouter}\ $y[j]$\ \textbf{à}\ $z$\;
+            $j \leftarrow j + 1$\;
+          }
+        }
+        
+        \algskip
+        \Return{$z + x[i \lto |x|] + y[j \lto |y|]$}
+      }
+      \algskip
+    
+      \lIf{$|s| \leq 1$}{
+        \Return{$s$}
+      }
+      \Else{
+        $m \leftarrow |s| \div 2$\;
+        
+        \Return{$\fusion(\trier(s[1 \lto m]), \trier(s[m+1 \lto |s|]))$}
+      }
+    }
+  \end{algorithm}  
+
+\item ...  
+\end{enumerate}
+
+\section*{Question 3}
+
+\begin{algorithm}[H]
+  \DontPrintSemicolon
+  \SetKwFunction{mult}{mult}
+  \SetKwProg{myproc}{}{}{}
+  \KwIn{$x, y \in \N$ représentés sous $n \in \N_{\geq 1}$ chiffres en
+    base $10$}  
+  \KwResult{$x \cdot y$}
+  \algskip
+
+  \myproc{\mult{$n, x, y$}\algdelim}{
+    \If{$n = 1$}{
+      \Return{$x \cdot y$}
+    }
+    \Else{
+      $k \leftarrow \lceil n / 2\rceil$\;
+      \algskip
+      \algskip
+
+      $a, b \leftarrow x \div 10^k,\, x~\mathrm{mod}~10^k$\;
+      $c, d \leftarrow y \div 10^k,\; y~\mathrm{mod}~10^k$\;
+      \algskip
+      \algskip
+      
+      $e \leftarrow \mult{$k, a, c$}$\;
+      $f \leftarrow \mult{$k, b, d$}$\;
+      $g \leftarrow \mult{$k, a - b, c - d$}$\;
+      \algskip
+      \algskip
+
+      \Return{$10^{2k} \cdot e + 10^k \cdot (e + f - g) + f$}\;
+    }
+  }
+\end{algorithm}
+
+\end{document}
