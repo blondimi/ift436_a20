@@ -66,12 +66,12 @@
                  
                  // Rotation récursive des blocs
                  setTimeout(() => {
-                     // Rotation globale des blocs
+                     // Rotation locale des blocs
                      rotation_(x,     y,     m);
                      rotation_(x + m, y,     m);
                      rotation_(x,     y + m, m);
                      rotation_(x + m, y + m, m);
-                                                      // A B --> B A
+                     // Rotation globale des blocs    // A B --> B A
                      inverser(x, y, x + m, y,     m); // C D     C D
                      inverser(x, y, x + m, y + m, m); //
                      inverser(x, y, x,     y + m, m); //     --> D A --> C A
