@@ -35,6 +35,15 @@ if __name__ == "__main__":
                                                     #  ####      ##
     print("     s =", s)                            #  ####      ##
     print("max(s) =", max_circ(s))                  #  ####     ###
-                                                    #  ####    ####
+    print()                                         #  ####    ####
                                                     #  ####  ######
                                                     #  ¯¯¯¯¯¯¯¯¯¯¯¯
+
+    # Exemple avec doublons aux deux bouts          #   #
+    s = [5, 7, 5]                                   #   #
+                                                    #  ###
+    print("     s =", s)                            #  ###
+    print("max(s) =", max_circ(s))                  #  ###
+    print("Oups...")                                #  ###
+                                                    #  ###
+                                                    #  ¯¯¯
