@@ -1,5 +1,3 @@
-from random import randint
-
 #  Pré-condition: séquence ordonnée circulairement t.q. |s| = 1
 #                 ou (|s| ≥ 2 et le premier élément diffère du dernier)
 # Post-condition: max(s)
