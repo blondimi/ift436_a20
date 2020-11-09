@@ -1,5 +1,21 @@
-import sys; sys.path.append("../chapitre4/") # Hack pour avoir accès au chap. 4
-from sac_a_dos import approximation
+from fractions import Fraction
+
+def sac_a_dos_glouton(v, p, c):
+    ratio   = lambda i: Fraction(v[i], p[i])
+    indices = sorted(range(len(v)), key=ratio, reverse=True)
+    valeur  = 0
+    poids   = 0
+
+    x = [0 for _ in v]
+
+    for i in indices:
+        if poids + p[i] <= c:
+            valeur += v[i]
+            poids  += p[i]
+        else:
+            break
+
+    return valeur
 
 def sac_a_dos_naif(v, p, c):
     def remplir(i, valeur, poids):
@@ -16,6 +32,7 @@ def sac_a_dos_naif(v, p, c):
 
 def sac_a_dos_elagage(v, p, c):
     def remplir(i, valeur, poids):
+        
         if i == len(v):
             return valeur
         else:
@@ -32,7 +49,9 @@ def sac_a_dos_elagage(v, p, c):
     return remplir(0, 0, 0)
 
 def sac_a_dos_turbo(v, p, c):
-    meilleure = sum(a * b for (a, b) in zip(approximation(c, v, p), v))
+    num_appels   = 0
+    num_completes = 0 
+    meilleure = max(max(v), sac_a_dos_glouton(v, p, c))
     potentiel = [sum(v[i:]) for i in range(len(v))]
 
     def remplir(i, valeur, poids):
@@ -88,3 +107,4 @@ if __name__ == "__main__":
     print()
     instance([ 50,   5,  65, 10,  12,  20],
              [700, 320, 845, 70, 420, 180], 900)
+
