@@ -1,0 +1,569 @@
+\PassOptionsToPackage{table}{xcolor}
+\documentclass{article}
+
+%% Mise en pages
+\usepackage{fontspec}                 %% >> Pour compiler
+\setmainfont{XCharter}                %%                 avec xelatex <<
+%\usepackage[utf8]{inputenc}          %% >> Pour compiler avec pdflatex <<
+\usepackage[french]{babel}            %% Français
+\NoAutoSpacing                        %% Retire l'espacement devant «:»
+\usepackage{geometry}                 %% Agrandir les marges
+\geometry{left=2.5cm, right=2.5cm, top=2.25cm}
+\setlength{\parskip}{\baselineskip}   %% Ajouter espacement entre lignes
+\setlength{\parindent}{0pt}           %% Retirer indentation
+\usepackage{fancyhdr}                 %% En-têtes/pieds de page
+\pagestyle{fancy}                     %%
+\fancyhf{}                            %%
+\fancyhead[R]{\session}               %%
+\fancyhead[L]{\sigle~--~\coursentete} %%
+\fancyhead[C]{\evaluation}            %%
+\fancyfoot[C]{\thepage}               %%
+
+%% Packages
+\usepackage[dvipsnames]{xcolor}       %% Plus de couleurs
+\usepackage{amsmath,amssymb}          %% Maths
+\usepackage{mathtools}                %% \coloneqq
+\usepackage{enumerate}                %% Extension de \begin{enumerate}
+\usepackage{exsheets}                 %% Environnements d'exercices
+\newcommand*\pointsformat[1]{{\scriptsize#1}}
+\SetupExSheets{                       %%
+  question/name        = {Question},  %%
+  points/name          = {\scriptsize pt/s},
+  points/bonus-name    = {\scriptsize pt/s},
+}                                     %%
+\usepackage{tikz}                     %% Dessins
+\usetikzlibrary{shapes, positioning, automata}  %%
+\usepackage{hyperref}                 %% Hyperliens
+\hypersetup{                          %%
+    colorlinks,                       %%
+    linkcolor={blue!70!black},        %%
+    citecolor={blue!70!black},        %%
+    urlcolor={red!70!black}           %%
+}                                     %%
+\usepackage[noline, onelanguage, french,
+  noend]{algorithm2e}                 %% Algorithmes
+\usepackage{fontawesome}              %% Icônes
+\usepackage{multicol}
+
+%% Virgules francophones dans pointage
+%%  (tiré de https://tex.stackexchange.com/a/396982/68991)
+\usepackage[locale=FR, detect-weight]{siunitx}
+\ExplSyntaxOn
+\cs_set_protected:Npn \exsheets_num:n #1
+ {
+  \num{\fp_eval:n{#1}}
+ }
+\ExplSyntaxOff
+
+%% Bonus
+\newcommand{\avance}{{\large$\bigstar$}}         %% Symbole pour bonus
+\newcommand{\avancepts}{{\scriptsize$\bigstar$}} %%
+
+%% Algorithmes
+\newcommand{\N}{\mathbb{N}}                      %% Entiers naturels
+\newcommand{\R}{\mathbb{R}}                      %% Nombres réels
+\newcommand{\mat}[1]{\mathbf{#1}}                %% Matrices
+\renewcommand{\O}{\mathcal{O}}                   %% Notation O(·)
+\renewcommand{\G}{\mathcal{G}}                   %% Graphe
+\newcommand{\T}{\mathcal{T}}                     %% Arbre
+\SetKwRepeat{Do}{faire}{tant que}                %% Structure do..while
+\newcommand{\algskip}{\vspace{3pt}}              %% Espacement vertical
+\definecolor{colComment}{rgb}{0.13, 0.55, 0.13}  %% Commentaires de couleur
+\newcommand\commentstyle[1]{\ttfamily\textcolor{colComment}{#1}}
+\SetCommentSty{commentstyle}                     %%
+
+%% Couleurs
+\colorlet{colEmph}{cyan!80!blue}
+\colorlet{colEmph2}{magenta!80!black}
+\colorlet{colEmph3}{green!70!black}
+\colorlet{colEmph4}{blue!80!purple}
+\colorlet{colEmph5}{orange}
+
+\colorlet{colBad}{red}
+\colorlet{colWarning}{orange}
+
+%% Commande de titre
+\newcommand{\maketitlecustom}{%
+  \begin{center}
+    \begin{tabular}{c}
+      \Large \sigle~--~\cours         \\[3pt]
+      \large Université de Sherbrooke \\[10pt]
+      \LARGE \textbf{\evaluation}     \\[10pt]
+    \end{tabular}
+    \begin{tabular}{lp{7.35cm}}
+      Enseignant:     & \enseignant   \\
+      Date de remise: & \remise       \\
+      À réaliser:     & \equipes      \\
+      Modalités:      & \modalites    \\
+      Bonus:          & \bonust       \\
+      Pointage:       & max.\ \pointssum*~points + \bonussum*~points bonus \\
+      Consignes & commentez et décrivez les grandes lignes de vos
+      algorithmes afin de faciliter leur compréhension
+    \end{tabular}
+  \end{center}
+}
+
+%% Information de l'évaluation
+\newcommand{\evaluation}{Devoir 4}
+\newcommand{\remise}{mercredi 25 novembre 2020 à 10h29}
+\newcommand{\modalites}{remettre en ligne sur \href{http://opus.dinf.usherbrooke.ca/}{Turnin} dans un fichier PDF}
+\newcommand{\equipes}{en équipe de deux {\scriptsize ou individuellement}}
+\newcommand{\bonust}{les questions bonus sont indiquées par \avance{}}
+\newcommand{\sigle}{IFT436}
+\newcommand{\cours}{Algorithmes et structures de données}
+\newcommand{\coursentete}{Algorithmes et struct.\ de données}
+\newcommand{\session}{Automne 2020}
+\newcommand{\enseignant}{Michael Blondin}
+
+%% Contenu
+\begin{document}
+
+\maketitlecustom
+
+\SetupExSheets{
+  question/name        = {Question},
+  points/name          = {\scriptsize pt/s},
+  points/bonus-name    = {\scriptsize pt/s},
+  points/number-format = \pointsformat,
+  points/bonus-format  = \pointsformat,
+}
+
+\vspace*{-10pt}
+
+%% Commandes pour construire des blocs 3D
+%% (Tiré de https://texample.net/tikz/examples/plane-partition/)
+%%
+% Three counters
+\newcounter{x}
+\newcounter{y}
+\newcounter{z}
+
+% The angles of x,y,z-axes
+\newcommand\xaxis{210}
+\newcommand\yaxis{-30}
+\newcommand\zaxis{90}
+
+% The top side of a cube
+\newcommand\topside[3]{
+  \fill[fill=colEmph5!25, draw=black,shift={(\xaxis:#1)},shift={(\yaxis:#2)},
+  shift={(\zaxis:#3)}] (0,0) -- (30:1) -- (0,1) --(150:1)--(0,0);
+}
+
+% The left side of a cube
+\newcommand\leftside[3]{
+  \fill[fill=colEmph!75, draw=black,shift={(\xaxis:#1)},shift={(\yaxis:#2)},
+  shift={(\zaxis:#3)}] (0,0) -- (0,-1) -- (210:1) --(150:1)--(0,0);
+}
+
+% The right side of a cube
+\newcommand\rightside[3]{
+  \fill[fill=colEmph2!75, draw=black,shift={(\xaxis:#1)},shift={(\yaxis:#2)},
+  shift={(\zaxis:#3)}] (0,0) -- (30:1) -- (-30:1) --(0,-1)--(0,0);
+}
+
+% The cube 
+\newcommand\cube[3]{
+  \topside{#1}{#2}{#3} \leftside{#1}{#2}{#3} \rightside{#1}{#2}{#3}
+}
+
+% Definition of \planepartition
+% To draw the following plane partition, just write \planepartition{ {a, b, c}, {d,e} }.
+%  a b c
+%  d e
+\newcommand\planepartition[1]{
+ \setcounter{x}{-1}
+  \foreach \a in {#1} {
+    \addtocounter{x}{1}
+    \setcounter{y}{-1}
+    \foreach \b in \a {
+      \addtocounter{y}{1}
+      \setcounter{z}{-1}
+      \foreach \c in {1,...,\b} {
+        \addtocounter{z}{1}
+        \cube{\value{x}}{\value{y}}{\value{z}}
+      }
+    }
+  }
+}
+
+%% Directions
+\newcommand{\dbas}{\textcolor{colEmph}{\faArrowDown}}
+\newcommand{\ddroite}{\textcolor{colEmph2}{\faArrowRight}}
+
+%% Question 1
+\begin{question}
+  Une \emph{montagne} est une matrice carrée $\mat{M} \in \N^{n \times
+    n}$ dont chaque ligne et chaque colonne est ordonnée de façon
+  strictement décroissante:\medskip
+  \[
+  \begin{array}{ccccccc}
+    \mat{M}[1, 1] &>& \mat{M}[1, 2] &>& \cdots &>& \mat{M}[1, n] \\[5pt]
+
+    \rotatebox[origin=c]{-90}{$>$} &&
+    \rotatebox[origin=c]{-90}{$>$} && &&
+    \rotatebox[origin=c]{-90}{$>$} \\[5pt]
+
+    \mat{M}[2, 1] &>& \mat{M}[2, 2] &>& \cdots &>& \mat{M}[2, n] \\[5pt]
+
+    \rotatebox[origin=c]{-90}{$>$} &&
+    \rotatebox[origin=c]{-90}{$>$} && &&
+    \rotatebox[origin=c]{-90}{$>$} \\[5pt]
+
+    \vdots && \vdots && && \vdots \\[5pt]
+
+    \mat{M}[n, 1] &>& \mat{M}[n, 2] &>& \cdots &>& \mat{M}[n, n]
+  \end{array}\smallskip
+  \] L'entrée $\mat{M}[i, j]$ indique la hauteur du sol de la montagne
+  à la coordonnée $(i, j)$. Le célèbre manchot
+  \href{https://fr.wikipedia.org/wiki/Tux}{\emph{Tux~\faLinux}} se
+  situe au sommet d'une telle montagne et désire se rendre tout en
+  bas. Tux peut descendre d'une position vers une position adjacente
+  en glissant sur son ventre le long des parois. Une telle glissade de
+  hauteur $h$ dure $f(h)$ secondes, où $f \colon \N_{> 0} \to \R_{>
+    0}$ est une fonction qui tient compte de la glace, du plumage, de
+  l'accélération, etc. Tux désire connaître la durée d'une descente
+  \emph{minimale}. Par exemple, considérons cette montagne:
+  \begin{center}
+    \vspace*{-15pt}
+    \hfill\hfill\hfill\hfill    
+      \begin{minipage}[c]{.48\linewidth}
+        $\mat{M} = \begin{pmatrix}
+          8 & 6 & 4 \\
+          7 & 4 & 3 \\
+          6 & 2 & 1 \\
+        \end{pmatrix}$
+        \quad\ $\equiv$
+      \end{minipage}\hspace{-3.7cm}
+      \begin{minipage}[c]{.48\linewidth}
+        \begin{tikzpicture}[thick, scale=0.4, transform shape]
+          \planepartition{{8, 6, 4}, {7, 4, 3}, {6, 2, 1}}
+          %% Image CC tirée de
+          %% https://pixabay.com/fr/vectors/no%C3%ABl-santa-claus-tux-bouchon-161316/
+          \node[scale=6] at (0.09, 8.7) {\includegraphics[width=10pt]{tux_xmas}};
+          \node[scale=3, red] at (0.15, -1.15) {\faFlag};
+        \end{tikzpicture}
+      \end{minipage}
+  \end{center}
+
+  \vspace*{-15pt}
+  Voici la durée de trois des six descentes:
+  
+  \begin{tabular}{l|l|l}
+    \textbf{Chemin} & \textbf{Durée {\small(en secondes)} } &
+    \textbf{Ex.} $f(h) = \sqrt{h}$ \\ \hline
+    
+    \ddroite\ \ddroite\ \dbas\ \dbas &
+
+    $f(8 - 6) + f(6 - 4) + f(4 - 3) + f(3 - 1) = f(2) + f(2) + f(1) +
+    f(2)$ & $\approx 5{,}24264$ \\
+
+    \dbas\ \ddroite\ \ddroite\ \dbas &
+
+    $f(8 - 7) + f(7 - 4) + f(4 - 3) + f(3 - 1) = f(1) + f(3) + f(1) +
+    f(2)$ & $\approx 5{,}14626$ \\
+
+    \dbas\ \dbas\ \ddroite\ \ddroite &
+
+    $f(8 - 7) + f(7 - 6) + f(6 - 2) + f(2 - 1) = f(1) + f(1) + f(4) +
+    f(1)$ & $\phantom{\approx}\; 5\phantom{,00000}$
+  \end{tabular}
+
+  En explorant toutes les descentes, on conclurait que la durée
+  minimale est de $5$ secondes lorsque $f(n) = \sqrt{n}$.
+
+  \pagebreak
+
+  \begin{enumerate}[(a)]
+  \setlength\itemsep{25pt}
+    
+  \item Si \marginpar{\addpoints{5}} $f(h) = h$, alors on peut
+    calculer la durée d'une descente minimale en temps
+    $\O(1)$. Pourquoi? Justifiez.
+
+  \item Donnez \marginpar{\addpoints{8}} un algorithme de force brute
+    qui identifie la \emph{durée} d'une descente minimale en explorant
+    \emph{toutes} les descentes. Votre algorithme fonctionne-t-il en
+    temps polynomial par rapport à $n$? Justifiez brièvement.
+
+  \item Donnez \marginpar{\addpoints{8}} un algorithme qui exploite la
+    programmation dynamique avec \emph{tableaux} afin d'identifier
+    la \emph{durée} d'une descente minimale. Votre algorithme doit
+    fonctionner en temps $\O(n^2)$. Quel tableau est calculé par
+    l'algorithme sur la montagne ci-dessus avec $f(h) = \sqrt{h}$?
+    Vous pouvez donner les valeurs symboliquement ou numériquement
+    arrondies à cinq décimaux après la virgule.\label{itm:tux:dyn}
+
+  \item Adaptez \marginpar{\addpoints{4}} votre algorithme obtenu
+    en~(\ref{itm:tux:dyn}) afin qu'il retourne une séquence
+    de \emph{directions} que Tux peut emprunter afin d'effectuer une
+    descente de durée minimale. Par exemple, votre algorithme devrait
+    retourner la séquence
+    $[\text{\dbas}, \text{\dbas}, \text{\ddroite}, \text{\ddroite}]$
+    pour la montagne ci-dessus avec $f(h) = \sqrt{h}$.
+  \end{enumerate}
+
+  \vspace*{15pt}
+  
+  \emph{Clarifications}:\medskip
+  \begin{itemize}
+    \setlength\itemsep{15pt}
+
+  \item Le sommet et le bas de la montagne se situent respectivement
+    aux positions $(1, 1)$ et $(n, n)$;
+    
+  \item À partir de la position $(i, j)$, Tux peut glisser aux
+    positions $(i + 1, j)$ et $(i, j + 1)$, pourvu qu'elles n'excèdent
+    pas la dimension de la montagne;
+
+  \item La hauteur de la glissade d'une position $(i, j)$ vers une
+    position adjacente $(i', j')$ est $\mat{M}[i, j] - \mat{M}[i',
+      j']$;
+    
+  \item On suppose que l'évaluation de $f(h)$ est une opération
+    élémentaire. Imaginez $f$ comme une fonction (pure) offerte par le
+    moteur physique d'un jeu vidéo dont vous ne connaissez pas
+    l'implémentation.
+       
+  \end{itemize}
+
+\end{question}
+
+\pagebreak
+
+%% Potions
+\newcommand{\potion}[3]{%
+  \raisebox{-5pt}{\begin{tikzpicture}[scale=#1, transform shape, #2]%
+    \node[inner sep=1pt] at (0, 0) {\faFlask};
+    \fill[gray!15, fill opacity=0.6] (0, -0.068) circle (2pt);
+    \node[scale=0.45, black] at (0, -0.066) {\textbf{\textsf{#3}}};
+  \end{tikzpicture}}%
+}
+\newcommand{\potionp}[3]{\raisebox{-2pt}{\potion{#1}{#2}{#3}}}
+
+%% Question 2
+\begin{question}
+  Considérons quatre types de \emph{potions}, représentés par les
+  symboles \textsf{a}, \textsf{b}, \textsf{c} et \textsf{x}, que nous
+  pouvons combiner. Le résultat des combinaisons des potions est
+  décrit par une \og table de multiplication \fg{} comme celle-ci:
+  \begin{center}
+    \begin{tabular}{c||c|c|c|c}
+      \raisebox{-5pt}{\tikz[scale=1.5,
+          transform shape]{\node {$\bigotimes$};}} &
+      
+      \cellcolor{gray!15}\potion{2.0}{magenta}{a} &
+      \cellcolor{gray!15}\potion{2.0}{cyan!80!blue}{b} &
+      \cellcolor{gray!15}\potion{2.0}{orange}{c} &
+      \cellcolor{gray!15}\potion{2.0}{red}{x} \\ \hline \hline
+      
+      \cellcolor{gray!15}\potion{2.0}{magenta}{a} &
+      \potion{2.0}{magenta}{a} &
+      \potion{2.0}{cyan!80!blue}{b} &
+      \potion{2.0}{red}{x} &
+      \potion{2.0}{magenta}{a} \\ \hline
+      
+      \cellcolor{gray!15}\potion{2.0}{cyan!80!blue}{b} &
+      \potion{2.0}{cyan!80!blue}{b} &
+      \potion{2.0}{cyan!80!blue}{b} &
+      \potion{2.0}{magenta}{a} &
+      \potion{2.0}{magenta}{a} \\ \hline
+
+      \cellcolor{gray!15}\potion{2.0}{orange}{c} &
+      \potion{2.0}{red}{x} &
+      \potion{2.0}{magenta}{a} &
+      \potion{2.0}{cyan!80!blue}{b} &
+      \potion{2.0}{orange}{c} \\ \hline
+
+      \cellcolor{gray!15}\potion{2.0}{red}{x} &
+      \potion{2.0}{magenta}{a} &
+      \potion{2.0}{magenta}{a} &
+      \potion{2.0}{orange}{c} &
+      \potion{2.0}{cyan!80!blue}{b} 
+    \end{tabular}
+  \end{center}
+
+  On peut combiner une séquence de potions en appliquant l'opération
+  $\otimes$. Puisque $\otimes$ n'est pas nécessairement associative,
+  l'ordre d'évaluation a une incidence sur le résultat. Par exemple,
+  en utilisant l'opération ci-dessus, la séquence $[\textsf{x},
+    \textsf{b}, \textsf{c}]$ peut être combinée de deux
+  façons:\smallskip
+  \begin{alignat*}{2}
+  \left(\potionp{2.0}{red}{x} \bigotimes
+  \potionp{2.0}{cyan!80!blue}{b}\right) \bigotimes
+  \potionp{2.0}{orange}{c}\
+  &\raisebox{-3pt}{\scalebox{2}{=}}\
+  \potionp{2.0}{magenta}{a} \bigotimes
+  \potionp{2.0}{orange}{c}\
+  &\raisebox{-3pt}{\scalebox{2}{=}}\
+  \potionp{2.0}{red}{x} \\[5pt]
+  %
+  \potionp{2.0}{red}{x} \bigotimes
+  \left(\potionp{2.0}{cyan!80!blue}{b} \bigotimes
+  \potionp{2.0}{orange}{c}\right)\
+  &\raisebox{-1pt}{\scalebox{2}{=}}\
+  \potionp{2.0}{red}{x} \bigotimes
+  \potionp{2.0}{magenta}{a}\
+  &\raisebox{-1pt}{\scalebox{2}{=}}\
+  \potionp{2.0}{magenta}{a}
+  \end{alignat*}
+  Une druidesse désire combiner consécutivement une séquence de potions
+  afin d'obtenir une potion de type \textsf{x}. Autrement dit, elle
+  cherche à résoudre ce problème:\medskip
+  \begin{quote}
+    \vspace*{5pt}
+    \begin{tabular}{lp{10.25cm}}
+      \textsc{Entrée}: & une séquence $p$ de $n \in \N_{\geq 1}$
+      symboles parmi $\{\textsf{a}, \textsf{b}, \textsf{c},
+      \textsf{x}\}$, et la table $T$ d'une opération binaire $\otimes$
+      sur $\{\textsf{a}, \textsf{b}, \textsf{c}, \textsf{x}\}$ \\[5pt]
+      
+      \textsc{Sortie}: & est-ce possible de parenthéser l'expression
+      $p[1] \otimes p[2] \otimes \cdots \otimes p[n]$ de telle sorte
+      qu'elle évalue à \textsf{x}?
+    \end{tabular}
+    \vspace*{5pt}
+  \end{quote}\bigskip
+
+  \begin{enumerate}[(a)]
+  \setlength\itemsep{30pt}
+    
+  \item Dites \marginpar{\addpoints{5}} si les séquences $p =
+    [\textsf{x}, \textsf{b}, \textsf{c}, \textsf{a}]$ et $q =
+    [\textsf{c}, \textsf{b}, \textsf{c}, \textsf{a}]$ peuvent évaluer
+    à \textsf{x} selon la table
+    ci-dessus. Justifiez.
+
+  \item Aidez la \marginpar{\addpoints{10}} druidesse en donnant un
+    algorithme qui résout son problème. Vous pouvez accéder à la table
+    $T$ de l'opération $\otimes$ en temps constant, par exemple: pour
+    la table ci-dessus, nous avons $T[\textsf{a}, \textsf{b}] =
+    \textsf{b}$ et $T[\textsf{c}, \textsf{a}] = \textsf{x}$. Votre
+    algorithme doit fonctionner en temps polynomial par rapport à
+    $n$. Expliquez pourquoi c'est le cas.
+  \end{enumerate}
+\end{question}
+
+\pagebreak
+
+\begin{question}
+  \begin{enumerate}[(a)]
+  \setlength\itemsep{15pt}
+
+  \item Exécutez \marginpar{\addpoints{5}} l'algorithme de Dijkstra
+    sur le graphe pondéré suivant à partir du sommet $a$. Laissez une
+    trace de chaque itération de l'algorithme en indiquant les sommets
+    marqués et les distances partielles
+    identifiées.\bigskip\label{itm:dijkstra}
+
+    \begin{center}
+      \begin{tikzpicture}[auto, very thick, node distance=3cm, font=\large,
+                          transform shape, scale=0.9]
+        \node[state]                               (a) {$a$};
+        \node[state, above right=1cm and 2cm of a] (b) {$b$};
+        \node[state, below right=1cm and 2cm of a] (c) {$c$};
+        \node[state,       right=3cm of b]         (d) {$d$};
+        \node[state,       right=3cm of c]         (e) {$e$};
+        \node[state, below right=1cm and 2cm of d] (f) {$f$};
+
+        \path[-]
+        (a) edge node {$1$} (b)
+        (a) edge node[swap] {$4$} (c)
+        (b) edge node {$2$} (c)
+        (b) edge node {$4$} (d)
+        (c) edge node[swap] {$3$} (e)
+        (c) edge node[swap] {$1$} (d)
+        (d) edge node {$2$} (f)
+        (d) edge node {$2$} (e)
+        (e) edge node[swap] {$2$} (f)
+        ;
+      \end{tikzpicture}
+    \end{center}
+
+  \item Soit $\G = (V, E)$ un graphe pondéré, non dirigé et
+    connexe. Soit $s \in V$ un sommet de $\G$. Un \emph{arbre de plus
+      courts chemins (par rapport à $s$)} est un sous-graphe $\T$ de
+    $\G$ qui satisfait ces propriétés:\medskip
+    
+    \begin{itemize}
+      \setlength\itemsep{10pt}
+      
+    \item $\T$ est un arbre couvrant de $\G$,
+      
+    \item pour tout $v \in V$, l'unique chemin simple de $s$ vers $v$
+      dans $\T$ est un plus court chemin de $s$ vers $v$.
+    \end{itemize}\bigskip
+    
+    Par exemple, voici un arbre de plus courts chemins par rapport au
+    sommet $s$ de ce graphe:\bigskip\medskip
+    \begin{center}
+      \begin{tikzpicture}[auto, very thick, node distance=3cm, font=\large,
+                          transform shape, scale=0.9]
+        \node[state]                 (a) {$s$};
+        \node[state, right=2cm of a] (b) {};
+        \node[state, below=2cm of a] (c) {};
+        \node[state, right=2cm of c] (d) {};
+        \node[state, right=2cm of d] (e) {};
+        
+        \path[-, orange, line width=6pt]
+        (a) edge node {} (b)
+        (b) edge node {} (d)
+        (c) edge node {} (d)
+        (d) edge node {} (e)
+        ;
+        
+        \path[-]
+        (a) edge node       {$2$} (b)
+        (a) edge node[swap] {$7$} (c)
+        (b) edge node[swap] {$4$} (c)
+        (b) edge node       {$1$} (d)
+        (c) edge node[swap] {$2$} (d)
+        (d) edge node[swap] {$4$} (e)
+        ;
+        
+      \end{tikzpicture}
+    \end{center}\bigskip\medskip
+  
+    \begin{enumerate}[(i)]
+    \setlength\itemsep{20pt}
+      
+    \item Cet \marginpar{\addpoints{3}} arbre est un arbre couvrant
+      \emph{minimal}. On pourrait donc être tenté de croire que les
+      deux notions coïncident. Montrez que ce n'est \emph{pas} le
+      cas. Autrement dit, identifiez un graphe pondéré $\G$ et un
+      sommet $s$ tel qu'un arbre de plus courts chemins par rapport à
+      $s$ ne correspond \emph{pas} à un arbre couvrant minimal de
+      $\G$. Justifiez.
+
+    \item Identifiez \marginpar{\addpoints{2}} un arbre de plus courts
+      chemins par rapport au sommet $a$ du graphe de la
+      sous-question~(\ref{itm:dijkstra}).
+
+    \vspace{15pt}
+    
+    \item[\avance{}] Si \marginpar{\avancepts{} \addbonus{5}} l'on
+      connaît des plus courts chemins (non dirigés) à partir de $s$ et
+      à partir de $t$, et qu'on retire une arête $e$ du graphe, alors
+      il est possible de recalculer la distance entre $s$ et $t$ en
+      temps linéaire. Montrez que c'est le cas en donnant un
+      algorithme qui résout le problème suivant en temps $\O(|V| +
+      |E|)$:
+
+      \begin{quote}
+        \vspace*{5pt}
+        \begin{tabular}{lp{10cm}}
+          \textsc{Entrée}: & un graphe pondéré, dirigé et connexe $\G =
+          (V, E)$, une arête $e \in E$, deux sommets $s, t \in V$, et
+          deux arbres de plus courts chemins $\T_s$ et $\T_t$ par
+          rapport à $s$ et $t$ respectivement \\[5pt]
+          
+          \textsc{Sortie}: & la distance entre $s$ et $t$ dans le graphe
+          $\G$ auquel on retire $e$
+        \end{tabular}
+        \vspace*{5pt}
+      \end{quote}
+    \end{enumerate}    
+  \end{enumerate}
+\end{question}
+
+\end{document}
