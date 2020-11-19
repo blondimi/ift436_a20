@@ -72,13 +72,13 @@ if __name__ == "__main__":
     print(mesure_centralite(sommets, adj, poids))
 
     # Exemple de https://leetcode.com/problems/sum-of-distances-in-tree/
-    sommets  = [0, 1, 2, 3, 4, 5]
-    adj      = {0: [1, 2],
-                1: [0],
-                2: [0, 3, 4, 5],
-                3: [2],
-                4: [2],
-                5: [2]}
-    poids    = {(u, v): 1 for u in sommets for v in adj[u]}
+    sommets = [0, 1, 2, 3, 4, 5]
+    adj     = {0: [1, 2],
+               1: [0],
+               2: [0, 3, 4, 5],
+               3: [2],
+               4: [2],
+               5: [2]}
+    poids   = {(u, v): 1 for u in sommets for v in adj[u]}
 
     print(mesure_centralite(sommets, adj, poids))
