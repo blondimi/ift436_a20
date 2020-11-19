@@ -29,7 +29,7 @@ def mesure_centralite(sommets, adj, poids):
 
     calculer_taille(racine)
 
-    # (c) Calculer la mesure de centralité de r
+    # (c) Calculer la mesure de centralité de la racine
     mesure = {v: None for v in sommets}
 
     def calculer_mesure_sousarbre(v):
