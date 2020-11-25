@@ -1,0 +1,68 @@
+\documentclass{article}
+
+%% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{enumerate}
+\usepackage[noline, onelanguage, french, noend]{algorithm2e}
+
+%% Macros
+\newcommand{\N}{\mathbb{N}}
+\renewcommand{\O}{\mathcal{O}}
+\SetKwFor{RepTimes}{faire}{fois}{}
+\newcommand{\algdelim}{\texttt{:}}
+\newcommand{\algskip}{\vspace*{3pt}}
+\newcommand{\emptyseq}{[\,]}
+\newcommand{\lto}{\,{:}\,}
+
+%% Titre
+\title{IFT436: devoir 5}
+\author{Foo McBar}
+\date{2 décembre 2020}
+
+\begin{document}
+\maketitle
+
+%% Contenu
+\section*{Question 1}
+
+\begin{enumerate}[(a)]
+\item Oui/non car...
+  
+\item \[\frac{1}{2^n}\]
+
+\item \[{10 \choose 5} \cdot 100!\]
+    
+\item ...
+
+  \begin{algorithm}[H]
+    \DontPrintSemicolon
+    \SetKwFunction{pseudomed}{$\texttt{pseudomed}_k\!$}
+    \SetKwProg{myproc}{}{}{}
+    \KwIn{séquence $s$ de $n \in \N_{\geq 3}$ éléments comparables distincts}
+
+    \KwResult{un élément raisonnable $x \in s$}
+    \algskip
+    
+    \myproc{\pseudomed{$s$}\algdelim}{
+      $t \leftarrow \emptyseq$\;
+      \algskip
+
+      \RepTimes{$k$}{
+        \textbf{choisir} $i \in [1..n]$ aléatoirement de façon uniforme\;
+        \textbf{ajouter} $s[i]$ \textbf{à} $t$\;
+      }
+
+      \algskip
+      \textbf{trier} $t$\;
+      \algskip
+      
+      \Return{$t[\lceil k / 2 \rceil]$}\;
+    }
+  \end{algorithm}  
+
+\item $\O(n^3)$
+\end{enumerate}
+
+\end{document}

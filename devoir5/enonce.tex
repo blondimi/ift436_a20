@@ -1,0 +1,266 @@
+\PassOptionsToPackage{table}{xcolor}
+\documentclass{article}
+
+%% Mise en pages
+\usepackage{fontspec}                 %% >> Pour compiler
+\setmainfont{XCharter}                %%                 avec xelatex <<
+%\usepackage[utf8]{inputenc}          %% >> Pour compiler avec pdflatex <<
+\usepackage[french]{babel}            %% Français
+\NoAutoSpacing                        %% Retire l'espacement devant «:»
+\usepackage{geometry}                 %% Agrandir les marges
+\geometry{left=2.5cm, right=2.5cm, top=2.25cm}
+\setlength{\parskip}{\baselineskip}   %% Ajouter espacement entre lignes
+\setlength{\parindent}{0pt}           %% Retirer indentation
+\usepackage{fancyhdr}                 %% En-têtes/pieds de page
+\pagestyle{fancy}                     %%
+\fancyhf{}                            %%
+\fancyhead[R]{\session}               %%
+\fancyhead[L]{\sigle~--~\coursentete} %%
+\fancyhead[C]{\evaluation}            %%
+\fancyfoot[C]{\thepage}               %%
+
+%% Packages
+\usepackage[dvipsnames]{xcolor}       %% Plus de couleurs
+\usepackage{amsmath,amssymb}          %% Maths
+\usepackage{mathtools}                %% \coloneqq
+\usepackage{enumerate}                %% Extension de \begin{enumerate}
+\usepackage{exsheets}                 %% Environnements d'exercices
+\newcommand*\pointsformat[1]{{\scriptsize#1}}
+\SetupExSheets{                       %%
+  question/name        = {Question},  %%
+  points/name          = {\scriptsize pt/s},
+  points/bonus-name    = {\scriptsize pt/s},
+}                                     %%
+\usepackage{tikz}                     %% Dessins
+\usetikzlibrary{shapes, positioning, automata}  %%
+\usepackage{hyperref}                 %% Hyperliens
+\hypersetup{                          %%
+    colorlinks,                       %%
+    linkcolor={blue!70!black},        %%
+    citecolor={blue!70!black},        %%
+    urlcolor={red!70!black}           %%
+}                                     %%
+\usepackage[noline, onelanguage, french,
+  noend]{algorithm2e}                 %% Algorithmes
+
+%% Virgules francophones dans pointage
+%%  (tiré de https://tex.stackexchange.com/a/396982/68991)
+\usepackage[locale=FR, detect-weight]{siunitx}
+\ExplSyntaxOn
+\cs_set_protected:Npn \exsheets_num:n #1
+ {
+  \num{\fp_eval:n{#1}}
+ }
+\ExplSyntaxOff
+
+%% Bonus
+\newcommand{\avance}{{\large$\bigstar$}}         %% Symbole pour bonus
+\newcommand{\avancepts}{{\scriptsize$\bigstar$}} %%
+
+%% Algorithmes
+\newcommand{\N}{\mathbb{N}}                      %% Entiers naturels
+\newcommand{\R}{\mathbb{R}}                      %% Nombres réels
+\renewcommand{\O}{\mathcal{O}}                   %% Notation O(·)
+\SetKwRepeat{Do}{faire}{tant que}                %% Structure do..while
+\SetKwFor{RepTimes}{faire}{fois}{}               %% Structure faire n fois
+\definecolor{colComment}{rgb}{0.13, 0.55, 0.13}  %% Commentaires de couleur
+\newcommand\commentstyle[1]{\ttfamily\textcolor{colComment}{#1}}
+\SetCommentSty{commentstyle}                     %%
+\newcommand{\algskip}{\vspace{3pt}}              %% Espacement vertical
+\newcommand{\algdelim}{\texttt{:}}               %%
+\newcommand{\emptyseq}{[\,]}                     %% Séquence vide
+
+%% Commande de titre
+\newcommand{\maketitlecustom}{%
+  \begin{center}
+    \begin{tabular}{c}
+      \Large \sigle~--~\cours         \\[3pt]
+      \large Université de Sherbrooke \\[10pt]
+      \LARGE \textbf{\evaluation}     \\[10pt]
+    \end{tabular}
+    \begin{tabular}{lp{7.35cm}}
+      Enseignant:     & \enseignant   \\
+      Date de remise: & \remise       \\
+      À réaliser:     & \equipes      \\
+      Modalités:      & \modalites    \\
+      Bonus:          & \bonust       \\
+      Pointage:       & max.\ \pointssum*~points + \bonussum*~points bonus \\
+      Consignes & commentez et décrivez les grandes lignes de vos
+      algorithmes afin de faciliter leur compréhension
+    \end{tabular}
+  \end{center}
+}
+
+%% Information de l'évaluation
+\newcommand{\evaluation}{Devoir 5}
+\newcommand{\remise}{mercredi 2 décembre 2020 à 10h29}
+\newcommand{\modalites}{remettre en ligne sur \href{http://opus.dinf.usherbrooke.ca/}{Turnin} dans un fichier PDF}
+\newcommand{\equipes}{en équipe de deux {\scriptsize ou individuellement}}
+\newcommand{\bonust}{les questions bonus sont indiquées par \avance{}}
+\newcommand{\sigle}{IFT436}
+\newcommand{\cours}{Algorithmes et structures de données}
+\newcommand{\coursentete}{Algorithmes et struct.\ de données}
+\newcommand{\session}{Automne 2020}
+\newcommand{\enseignant}{Michael Blondin}
+
+%% Contenu
+\begin{document}
+
+\maketitlecustom
+
+\SetupExSheets{
+  question/name        = {Question},
+  points/name          = {\scriptsize pt/s},
+  points/bonus-name    = {\scriptsize pt/s},
+  points/number-format = \pointsformat,
+  points/bonus-format  = \pointsformat,
+}
+
+\vspace*{1cm}
+
+\newcommand{\rang}[1]{\mathrm{rang}(#1)}
+
+Le pivot idéal pour le tri rapide est la médiane. En théorie, on peut
+calculer la médiane d'une séquence en temps linéaire, mais cela
+s'avère peu efficace en pratique. Une autre approche consiste à
+choisir un élément à une distance raisonnable de la médiane, comme un
+élément compris entre le premier et troisième quartile.
+
+Soit $s$ une séquence de $n$ éléments comparables distincts. Le
+\emph{rang} d'un élément $x \in s$, dénoté $\rang{x}$, correspond à la
+position de $x$ dans $s$ ordonnée en ordre croissant (en comptant à
+partir de $1$). Nous disons qu'un élément $x \in s$
+est \emph{raisonnable} si $$\lceil n / 4\rceil < \rang{x} \leq \lfloor
+3n / 4 \rfloor.$$ Par exemple, considérons la séquence $s = [50, 13,
+20, 67, 41, 89, 70, 30]$. Nous avons $\rang{13} = 1$, $\rang{67} = 6$
+et $\rang{89} = 8$. De plus, les pivots raisonnables de $s$ sont $30$,
+$41$, $50$ et $67$.
+
+Afin d'identifier un pivot raisonnable, une approche probabiliste
+consiste à choisir $k$ éléments aléatoirement (de façon uniforme),
+puis de retourner la médiane de ces $k$ éléments, où $k \in \N$ est un
+paramètre impair:
+
+{
+  \setlength{\interspacetitleruled}{0pt}%
+  \setlength{\algotitleheightrule}{0pt}%
+  \begin{algorithm}[H]
+    \DontPrintSemicolon
+    \SetKwFunction{pseudomed}{$\texttt{pseudomed}_k\!$}
+    \SetKwProg{myproc}{}{}{}
+    \KwIn{séquence $s$ de $n \in \N_{\geq 3}$ éléments comparables distincts}
+
+    \KwResult{un élément raisonnable $x \in s$}
+    \algskip
+    
+    \myproc{\pseudomed{$s$}\algdelim}{
+      $t \leftarrow \emptyseq$\;
+      \algskip
+
+      \RepTimes{$k$}{
+        \textbf{choisir} $i \in [1..n]$ aléatoirement de façon uniforme\;
+        \textbf{ajouter} $s[i]$ \textbf{à} $t$\;
+      }
+
+      \algskip
+      \textbf{trier} $t$\;
+      \algskip
+      
+      \Return{$t[\lceil k / 2 \rceil]$}\;
+    }
+  \end{algorithm}
+}
+
+\vspace*{8pt}
+
+{\small
+\emph{Remarques}:\medskip
+\begin{itemize}
+  \setlength\itemsep{8pt}
+  
+\item la constante $k$ ne fait \emph{pas} partie de l'entrée, il
+  s'agit d'un paramètre fixe. Autrement dit,
+  $\texttt{pseudomed}_1, \allowbreak \texttt{pseudomed}_3, \allowbreak \texttt{pseudomed}_5, \texttt{pseudomed}_7, \ldots$
+  sont tous des algorithmes différents;
+
+\item le choix d'un nombre aléatoire est ici une
+  opération élémentaire qui s'effectue \emph{toujours} en temps
+  constant.
+\end{itemize}
+}
+
+\pagebreak
+
+\begin{question}
+  \begin{enumerate}[(a)]
+    \setlength\itemsep{25pt}
+
+  \item L'algorithme \marginpar{\addpoints{3}} \pseudomed est-il de
+    Las Vegas ou de Monte Carlo? Justifiez.
+
+  \item Quelle \marginpar{\addpoints{5}} est la probabilité que
+    $\texttt{pseudomed}_3$ retourne la médiane de $s = [42, 9000, 0]$?
+    Justifiez.\medskip
+
+     {\small\hfill\emph{Indice}: on peut procéder par comptage plutôt
+     que par énumération exhaustive.} \\[-15pt]
+
+  \item[] \hspace*{-17pt}\underline{\emph{Pour les sous-questions
+      suivantes, supposez que $n$ est divisible par $4$ (cela
+      simplifie les calculs).}} \\[-20pt]    
+
+  \item Donnez \marginpar{\addpoints{8}} la probabilité d'erreur de
+     $\texttt{pseudomed}_1$ et de $\texttt{pseudomed}_3$, puis
+     généralisez en donnant une expression symbolique qui décrit la
+     probabilité d'erreur de
+     $\texttt{pseudomed}_k$. Justifiez.\medskip
+
+     {\small\hfill\emph{Indice}: considérez trois types d'éléments:
+     raisonnables, déraisonnables de gauche et déraisonnables de droite; }
+     \\[-15pt]
+     
+     {\small\hfill pensez au coefficient binomial.}
+
+  \item Donnez \marginpar{\addpoints{4}} un algorithme (déterministe)
+    qui détermine en temps $\O(|s|)$ si un élément $x \in s$ est
+    raisonnable.\label{qu:raisonnable}
+
+  \item La procédure \marginpar{\addpoints{5}} ci-dessous exécute
+    $\texttt{pseudomed}_3$ jusqu'à ce qu'un élément raisonnable soit
+    identifié. Ainsi, sa valeur de retour est toujours correcte. Quel
+    est son \emph{temps espéré} sous notation $\O$? Justifiez.
+
+    \begin{minipage}[t]{0.9575\textwidth}
+    {
+      \setlength{\interspacetitleruled}{0pt}%
+      \setlength{\algotitleheightrule}{0pt}%
+      \begin{algorithm}[H]
+        \DontPrintSemicolon
+        \SetKwProg{myproc}{}{}{}
+        \KwIn{séquence $s$ de $n \in \N_{\geq 3}$
+              éléments comparables distincts}
+        \KwResult{un élément raisonnable $x \in s$}
+        \algskip
+
+        \Do{$x$ n'est pas raisonnable
+          \tcp*[f]{déterminé avec l'algo.\ de la sous-question~(d)}}{
+          $x \leftarrow \texttt{pseudomed}_3(s)$\;
+        }
+        
+        \algskip
+        \Return{$x$}
+        
+      \end{algorithm}
+    }
+    \end{minipage}
+
+    \vspace*{80pt}
+    
+  \item[\avance{}] Montrez \marginpar{\avancepts{} \addbonus{2.5}} qu'il
+    existe une valeur de $k$ pour laquelle la probabilité d'erreur de
+    \pseudomed est $\leq 1 / 2^{275}$.
+    
+  \end{enumerate}
+\end{question}
+
+\end{document}
