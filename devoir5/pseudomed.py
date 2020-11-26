@@ -22,3 +22,5 @@ if __name__ == "__main__":
         
         if x == 1 or x == 4: # Attention, à changer manuellement si s change
             num_erreurs += 1
+
+    print("{}".format(num_erreurs / repetitions))
